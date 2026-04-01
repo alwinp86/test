@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Let's fHiX it! — Mapping Voortgang</title>
+<style>
+:root {
+  --g:   #007062; --gd: #005549; --gm: #008f7a;
+  --lime:#E3FFAA; --lm2:#c8f07a; --lmd:#a8d850;
+  --wit: #ffffff; --zw:  #111111;
+  --bgl: #f5f5f3; --bgm: #e8e8e5; --gr:  #c0c0ba; --grd: #6b6b65;
+  --rd:  #c0392b; --am:  #d4870a; --bl:  #1a6fa8;
+  --bd:  #d8d8d3;
+  --sh:  0 2px 12px rgba(0,112,98,.10), 0 1px 3px rgba(0,0,0,.06);
+  --shl: 0 6px 28px rgba(0,112,98,.15);
+  --r:   6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: var(--bgl); color: var(--zw); font-size: 14px; line-height: 1.45; min-height: 100vh; }
+
+/* HEADER */
+.hdr { background: var(--g); color: #fff; position: sticky; top: 0; z-index: 90; box-shadow: 0 2px 16px rgba(0,80,69,.3); }
+.hdr-i { max-width: 1540px; margin: 0 auto; padding: 0 28px; display: flex; align-items: stretch; height: 56px; }
+.hdr-logo { background: var(--lime); color: var(--gd); font-weight: 700; font-size: 15px; padding: 0 28px 0 20px; display: flex; align-items: center; margin-right: 20px; clip-path: polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%); }
+.hdr-txt { display: flex; flex-direction: column; justify-content: center; flex: 1; }
+.hdr-t1 { font-size: 16px; font-weight: 700; }
+.hdr-t2 { font-size: 11px; opacity: .7; margin-top: 1px; }
+.hdr-r  { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.hdr-badge { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); color: #fff; font-size: 12px; padding: 5px 14px; border-radius: 20px; white-space: nowrap; }
+.maptool { background: var(--lime); color: var(--gd); font-size: 12px; font-weight: 700; padding: 5px 14px; border-radius: 20px; text-decoration: none; white-space: nowrap; transition: background .18s; }
+.maptool:hover { background: var(--lm2); }
+
+/* IMPORT BAR */
+.imp-bar { background: var(--lime); border-bottom: 2px solid var(--lm2); padding: 9px 28px; display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--gd); }
+.imp-lbl { background: var(--g); color: #fff; font-weight: 700; font-size: 13px; padding: 7px 18px; border-radius: 5px; cursor: pointer; white-space: nowrap; transition: background .18s; user-select: none; }
+.imp-lbl:hover { background: var(--gd); }
+#fileImport { display: none; }
+.imp-stat { font-size: 12px; color: var(--gd); }
+.imp-rst { background: none; border: 1px solid var(--g); color: var(--g); font-size: 12px; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-family: inherit; transition: all .18s; display: none; }
+.imp-rst:hover { background: var(--g); color: #fff; }
+.imp-rst.on { display: inline-block; }
+
+/* WELKOM */
+.welkom { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; padding: 40px 20px; }
+.welkom-k { background: #fff; border: 1px solid var(--bd); border-top: 4px solid var(--g); border-radius: var(--r); box-shadow: var(--shl); padding: 44px 52px; max-width: 420px; }
+.welkom-k h2 { font-size: 19px; font-weight: 700; color: var(--g); margin-bottom: 10px; }
+.welkom-k p  { font-size: 13px; color: var(--grd); margin-bottom: 6px; line-height: 1.6; }
+.welkom-btn { display: block; width: 100%; background: var(--g); color: #fff; font-family: Arial,sans-serif; font-size: 14px; font-weight: 700; padding: 12px 20px; border-radius: 6px; cursor: pointer; text-align: center; transition: background .18s; margin-top: 22px; border: none; }
+.welkom-btn:hover { background: var(--gd); }
+
+/* MAIN */
+.main { max-width: 1540px; margin: 0 auto; padding: 22px 28px 60px; }
+
+/* MIJLPALEN */
+.mjk { background: #fff; border: 1px solid var(--bd); border-radius: var(--r); box-shadow: var(--sh); margin-bottom: 20px; overflow: hidden; }
+.kh  { background: var(--g); color: #fff; padding: 11px 20px; display: flex; align-items: center; justify-content: space-between; }
+.kh-t { font-size: 14px; font-weight: 700; }
+.kh-s { font-size: 11.5px; opacity: .75; }
+.mjb { padding: 24px 28px 20px; }
+.tjw { position: relative; }
+.tjl { position: absolute; top: 22px; left: 50px; right: 50px; height: 3px; background: var(--bgm); border-radius: 2px; }
+.tjv { position: absolute; top: 0; left: 0; height: 100%; border-radius: 2px; background: linear-gradient(90deg,var(--g),var(--gm)); }
+.mjr { display: flex; justify-content: space-between; position: relative; }
+.mji { display: flex; flex-direction: column; align-items: center; gap: 7px; min-width: 78px; }
+.mjd { width: 24px; height: 24px; border-radius: 50%; border: 3px solid var(--gr); background: #fff; display: flex; align-items: center; justify-content: center; position: relative; z-index: 2; font-size: 10px; font-weight: 700; color: #fff; }
+.mjd.vrl { background: var(--g); border-color: var(--g); }
+.mjd.hud { background: var(--am); border-color: var(--am); animation: pd 2s infinite; }
+.mjd.toe { background: #fff; border-color: var(--gr); }
+.mjd.lg  { border-color: var(--lmd); }
+.mjd.lg.vrl { background: var(--lmd); border-color: var(--lmd); }
+@keyframes pd { 0%,100%{box-shadow:0 0 0 5px rgba(212,135,10,.18);}50%{box-shadow:0 0 0 9px rgba(212,135,10,.06);} }
+.mjn { font-size: 11px; font-weight: 700; text-align: center; line-height: 1.2; }
+.mjdt { font-size: 10.5px; color: var(--grd); text-align: center; }
+.dt { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-align: center; white-space: nowrap; }
+.dt-vrl { color: var(--grd); background: var(--bgm); }
+.dt-bin  { color: #7a3800; background: rgba(212,135,10,.15); }
+.dt-urg  { color: var(--rd); background: rgba(192,57,43,.12); }
+.dt-toe  { color: var(--gd); background: rgba(0,112,98,.1); }
+.dt-lg   { color: var(--gd); background: var(--lime); }
+
+/* KPI */
+.kpi-rij { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; margin-bottom: 20px; }
+@media(max-width:1100px){ .kpi-rij{ grid-template-columns: repeat(3,1fr); } }
+.kpik { background: #fff; border: 1px solid var(--bd); border-radius: var(--r); padding: 18px 20px 16px; box-shadow: var(--sh); border-top: 3px solid var(--gr); position: relative; overflow: hidden; transition: transform .18s, box-shadow .18s; }
+.kpik:hover { transform: translateY(-2px); box-shadow: var(--shl); }
+.kpik.ka,.kpik.kb { border-top-color: var(--g); }
+.kpik.kc { border-top-color: var(--am); }
+.kpik.kd,.kpik.ke { border-top-color: var(--rd); }
+.kpi-l { font-size: 10.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--grd); margin-bottom: 8px; }
+.kpi-w { font-size: 34px; font-weight: 700; line-height: 1; margin-bottom: 3px; }
+.kpi-s { font-size: 11.5px; color: var(--grd); }
+.kpi-a { position: absolute; right: 16px; top: 16px; font-size: 24px; opacity: .09; }
+
+/* FILTER BAR */
+.fb { background: #fff; border: 1px solid var(--bd); border-radius: var(--r); padding: 12px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; box-shadow: var(--sh); }
+.fl { font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--g); white-space: nowrap; }
+.fsep { width: 1px; height: 22px; background: var(--bd); }
+select,.zi { border: 1px solid var(--bd); border-radius: 4px; padding: 6px 30px 6px 10px; font-family: inherit; font-size: 13px; color: var(--zw); background: var(--bgl); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23007062'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; transition: border-color .18s; }
+select:focus,.zi:focus { outline: none; border-color: var(--g); }
+.zi { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%23007062' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E"); background-position: left 9px center; padding-left: 28px; padding-right: 10px; min-width: 200px; }
+#fD{min-width:230px;}#fW{min-width:240px;}#fM{min-width:130px;}
+.rk { background: none; border: 1px solid var(--bd); border-radius: 4px; padding: 6px 14px; font-size: 12px; color: var(--grd); cursor: pointer; font-family: inherit; transition: all .18s; }
+.rk:hover { border-color: var(--g); color: var(--g); }
+.wkn { margin-left: auto; display: flex; gap: 3px; }
+.wk { border: 1px solid var(--bd); background: none; padding: 6px 14px; font-size: 12px; font-family: inherit; cursor: pointer; color: var(--grd); border-radius: 4px; font-weight: 600; transition: all .18s; }
+.wk.on { background: var(--g); color: #fff; border-color: var(--g); }
+.wk:hover:not(.on) { border-color: var(--g); color: var(--g); }
+
+/* SECTIE TITEL */
+.st { font-size: 15px; font-weight: 700; color: var(--gd); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.st::after { content: ''; flex: 1; height: 1px; background: var(--bd); }
+
+/* DOMEIN GRID */
+.dg { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px,1fr)); gap: 16px; margin-bottom: 20px; }
+.dk { background: #fff; border: 1px solid var(--bd); border-radius: var(--r); box-shadow: var(--sh); overflow: hidden; transition: transform .18s,box-shadow .18s; }
+.dk:hover { transform: translateY(-2px); box-shadow: var(--shl); }
+.dkh { padding: 13px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--bd); }
+.dba { width: 34px; height: 34px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; color: #fff; flex-shrink: 0; }
+.dn  { font-weight: 700; font-size: 13.5px; line-height: 1.3; flex: 1; }
+.dm  { font-size: 11px; color: var(--grd); margin-top: 1px; }
+.pb  { background: rgba(192,57,43,.1); color: var(--rd); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+.dkb { padding: 14px 16px; }
+.dstat { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 14px; }
+.dv { font-size: 20px; font-weight: 700; }
+.dl { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--grd); margin-top: 1px; }
+.dv.g{color:var(--g);}.dv.a{color:var(--am);}.dv.r{color:var(--rd);}
+.ps { height: 10px; border-radius: 5px; background: var(--bgm); overflow: hidden; display: flex; margin-bottom: 10px; }
+.psg { height: 100%; transition: width .7s ease; }
+.psg.g{background:var(--g);}.psg.a{background:var(--am);}.psg.r{background:var(--rd);}
+.leg { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+.li  { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--grd); }
+.lb  { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.wgl { display: flex; flex-direction: column; gap: 4px; }
+.wgr { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 4px; cursor: pointer; transition: background .15s; }
+.wgr:hover { background: var(--lime); }
+.wgn { font-size: 12px; flex: 1; line-height: 1.3; }
+.wgb { width: 56px; height: 5px; border-radius: 3px; background: var(--bgm); overflow: hidden; flex-shrink: 0; }
+.wgf { height: 100%; border-radius: 3px; background: var(--g); }
+.wgp { font-size: 11.5px; color: var(--grd); min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* DETAIL TABEL */
+.tc { background: #fff; border: 1px solid var(--bd); border-radius: var(--r); box-shadow: var(--sh); overflow: hidden; }
+.tch { padding: 13px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--bd); background: var(--g); color: #fff; }
+.tct { font-size: 14px; font-weight: 700; }
+.rtl { background: rgba(255,255,255,.18); color: #fff; font-size: 11.5px; padding: 3px 10px; border-radius: 12px; }
+.tw2 { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { background: var(--lime); color: var(--gd); font-weight: 700; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 2px solid var(--lm2); white-space: nowrap; cursor: pointer; user-select: none; }
+thead th:hover { background: var(--lm2); }
+.pj { opacity: .45; font-size: 9px; margin-left: 3px; }
+tbody td { padding: 8px 14px; border-bottom: 1px solid rgba(0,0,0,.05); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: rgba(0,112,98,.04); }
+tbody tr.hp td:first-child { border-left: 3px solid var(--rd); padding-left: 11px; }
+.tm  { background: rgba(0,112,98,.1); color: var(--gd); font-size: 11px; padding: 2px 7px; border-radius: 3px; font-family: 'Courier New',monospace; font-weight: 700; }
+.td2 { font-size: 11px; padding: 2px 7px; border-radius: 3px; font-weight: 700; }
+.num { font-variant-numeric: tabular-nums; }
+.mpw { display: flex; align-items: center; gap: 6px; }
+.mpb { width: 46px; height: 5px; border-radius: 3px; background: var(--bgm); overflow: hidden; flex-shrink: 0; }
+.mpf { height: 100%; border-radius: 3px; }
+.mpf.g{background:var(--g);}.mpf.a{background:var(--am);}.mpf.r{background:var(--rd);}
+
+/* ══ HISTORIE — tab systeem ══ */
+.hist-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--bd); padding: 0 20px; background: var(--bgl); }
+.hist-tab  { padding: 10px 18px; font-size: 13px; font-weight: 600; color: var(--grd); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all .18s; white-space: nowrap; }
+.hist-tab:hover { color: var(--g); }
+.hist-tab.on { color: var(--g); border-bottom-color: var(--g); }
+.hist-pnl { padding: 20px 24px; display: none; }
+.hist-pnl.on { display: block; }
+.lgw { width: 100%; overflow-x: auto; }
+.lgw svg { display: block; width: 100%; }
+.gh { text-align: center; padding: 50px 20px; color: var(--grd); font-size: 13px; }
+
+/* Delta tabel */
+.delta-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.delta-tbl th { background: var(--lime); color: var(--gd); font-weight: 700; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 9px 12px; text-align: left; border-bottom: 2px solid var(--lm2); white-space: nowrap; }
+.delta-tbl td { padding: 8px 12px; border-bottom: 1px solid rgba(0,0,0,.05); vertical-align: middle; font-variant-numeric: tabular-nums; }
+.delta-tbl tr:last-child td { border-bottom: none; }
+.delta-tbl tr:hover td { background: rgba(0,112,98,.04); }
+.dpos { color: var(--g); font-weight: 700; }
+.dneg { color: var(--rd); font-weight: 700; }
+.dnul { color: var(--grd); }
+
+/* Snapshot vergelijking */
+.snap-krt { display: grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap: 12px; margin-bottom: 16px; }
+.snap-k   { background: #fff; border: 1px solid var(--bd); border-radius: var(--r); padding: 14px 16px; box-shadow: var(--sh); }
+.snap-d   { font-size: 11px; font-weight: 700; color: var(--grd); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .05em; }
+.snap-v   { font-size: 24px; font-weight: 700; margin-bottom: 2px; }
+.snap-s   { font-size: 11px; color: var(--grd); }
+.snap-v.g { color: var(--g); }
+.snap-v.r { color: var(--rd); }
+.snap-v.a { color: var(--am); }
+
+/* Tooltip */
+.ht-tip { position: fixed; background: #222; color: #fff; font-family: Arial,sans-serif; font-size: 12px; padding: 8px 12px; border-radius: 5px; pointer-events: none; z-index: 300; opacity: 0; transition: opacity .15s; line-height: 1.6; white-space: nowrap; border-left: 3px solid #E3FFAA; }
+.leeg { text-align: center; padding: 60px 20px; color: var(--grd); }
+.leeg h3 { font-size: 15px; margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<div class="ht-tip" id="htTip"></div>
+
+
+<div id="spFb" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#005549,#007062);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif">
+  <div style="background:#fff;border-radius:8px;padding:48px 52px;text-align:center;max-width:460px;box-shadow:0 8px 40px rgba(0,0,0,.25);border-top:5px solid #007062">
+    <div style="font-size:48px;margin-bottom:16px">📊</div>
+    <h2 style="font-size:20px;font-weight:700;color:#007062;margin-bottom:10px">Let's fHiX it! — Dashboard</h2>
+    <p style="font-size:13px;color:#555;margin-bottom:22px;line-height:1.7">SharePoint toont dit dashboard niet in de documentviewer.<br>Klik hieronder om het te openen in een nieuw tabblad.</p>
+    <a href="javascript:void(0)" onclick="window.open(window.location.href,'_blank')"
+       style="display:inline-block;background:#007062;color:#fff;font-weight:700;font-size:15px;padding:14px 32px;border-radius:6px;text-decoration:none;cursor:pointer"
+       onmouseover="this.style.background='#005549'" onmouseout="this.style.background='#007062'">
+      🔗 &nbsp;Openen in nieuw tabblad
+    </a>
+  </div>
+</div>
+
+<header class="hdr">
+  <div class="hdr-i">
+    <div class="hdr-logo">NKI-AVL</div>
+    <div class="hdr-txt">
+      <div class="hdr-t1">Let's fHiX it! &mdash; Mapping Voortgang</div>
+      <div class="hdr-t2">Herimplementatie Maatwerk &rarr; Standaard Content &nbsp;&middot;&nbsp; ChipSoft HiX</div>
+    </div>
+    <div class="hdr-r">
+      <a class="maptool" href="https://mappingtool.nki.nl/" target="_blank">&#128506; Mappingtool</a>
+      <span class="hdr-badge" id="hdrBadge">Gegenereerd op 30-03-2026 · 4 snapshot(s)</span>
+    </div>
+  </div>
+</header>
+
+
+
+<div id="welkom" class="welkom" style="display:none">
+  <div class="welkom-k">
+    <div style="font-size:40px;margin-bottom:16px">&#128194;</div>
+    <h2>Bestanden laden</h2>
+    <p>Selecteer &eacute;&eacute;n of meerdere <strong>mapping-JJJJMMDD.txt</strong> exportbestanden.</p>
+    <p style="font-size:12px">Meerdere bestanden tegelijk = historische analyse zichtbaar.</p>
+    <label class="welkom-btn" for="fileImport">&#128196;&nbsp; Bestanden kiezen&hellip;</label>
+  </div>
+</div>
+
+<main class="main" id="dashMain" style="display:none">
+
+  <!-- MIJLPALEN -->
+  <div class="mjk">
+    <div class="kh">
+      <span class="kh-t">&#128197; Mijlpalen planning</span>
+      <span class="kh-s" id="vmj">&mdash;</span>
+    </div>
+    <div class="mjb">
+      <div class="tjw">
+        <div class="tjl"><div class="tjv" id="tjv"></div></div>
+        <div class="mjr" id="mjrij"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-rij">
+    <div class="kpik ka"><div class="kpi-a">&#128202;</div><div class="kpi-l">Totaal waarden</div><div class="kpi-w" id="kT">&mdash;</div><div class="kpi-s">in <span id="kTb">&mdash;</span> tabellen</div></div>
+    <div class="kpik kb"><div class="kpi-a">&#9989;</div><div class="kpi-l">Geaccordeerd</div><div class="kpi-w" id="kA">&mdash;</div><div class="kpi-s" id="kAs"></div></div>
+    <div class="kpik kc"><div class="kpi-a">&#128269;</div><div class="kpi-l">Te controleren</div><div class="kpi-w" id="kC">&mdash;</div><div class="kpi-s" id="kCs"></div></div>
+    <div class="kpik kd"><div class="kpi-a">&#128506;</div><div class="kpi-l">Nog te mappen</div><div class="kpi-w" id="kM">&mdash;</div><div class="kpi-s" id="kMs"></div></div>
+    <div class="kpik ke"><div class="kpi-a">&#9888;</div><div class="kpi-l">Problemen</div><div class="kpi-w" id="kP">&mdash;</div><div class="kpi-s" id="kPs"></div></div>
+  </div>
+
+  <!-- FILTER -->
+  <div class="fb">
+    <span class="fl">Filteren op</span>
+    <select id="fD" onchange="fw()"><option value="">Alle domeinen</option></select>
+    <select id="fW" onchange="fw()"><option value="">Alle werkgroepen</option></select>
+    <div class="fsep"></div>
+    <select id="fM" onchange="fw()"><option value="">Alle modules</option></select>
+    <input type="text" class="zi" id="fZ" placeholder="Zoeken op naam&hellip;" oninput="fw()">
+    <button class="rk" onclick="rf()">&#8634; Wis filters</button>
+    <div class="wkn">
+      <button class="wk on"  id="btnDomein"  onclick="wisselW('domein')">Per domein</button>
+      <button class="wk"     id="btnDetail"  onclick="wisselW('detail')">Detailtabel</button>
+      <button class="wk"     id="btnHist"    onclick="wisselW('historie')">Historie</button>
+    </div>
+  </div>
+
+  <!-- DOMEIN WEERGAVE -->
+  <div id="vD">
+    <div class="st">Voortgang per domein</div>
+    <div class="dg" id="domGrid"></div>
+  </div>
+
+  <!-- DETAIL WEERGAVE -->
+  <div id="vDt" style="display:none">
+    <div class="tc">
+      <div class="tch"><span class="tct">Detailoverzicht mapping-tabellen</span><span class="rtl" id="rijTl">0 rijen</span></div>
+      <div class="tw2">
+        <table>
+          <thead><tr>
+            <th onclick="sortT('name')">Naam <span class="pj">&#9660;</span></th>
+            <th onclick="sortT('module')">Module <span class="pj">&#9660;</span></th>
+            <th onclick="sortT('domain')">Domein <span class="pj">&#9660;</span></th>
+            <th onclick="sortT('wg')">Werkgroep <span class="pj">&#9660;</span></th>
+            <th onclick="sortT('total')">Totaal <span class="pj">&#9660;</span></th>
+            <th onclick="sortT('approved')">Geaccordeerd <span class="pj">&#9660;</span></th>
+            <th onclick="sortT('check')">Te controleren <span class="pj">&#9660;</span></th>
+            <th onclick="sortT('tomap')">Te mappen <span class="pj">&#9660;</span></th>
+            <th onclick="sortT('probleem')">Probleem <span class="pj">&#9660;</span></th>
+          </tr></thead>
+          <tbody id="dtLijf"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORIE WEERGAVE -->
+  <div id="vH" style="display:none">
+    <div class="tc">
+      <div class="tch">
+        <span class="tct">&#128200; Historische analyse</span>
+        <span class="rtl" id="histSnaps">&mdash;</span>
+      </div>
+      <div id="histInhoud"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+const VANDAAG = new Date();
+const MIJLPALEN = [
+  {s:'r1a',n:'R1 Aanlevering', d:new Date('2026-02-27')},
+  {s:'r1s',n:'R1 Spiegeltest', d:new Date('2026-03-30')},
+  {s:'r2a',n:'R2 Aanlevering', d:new Date('2026-04-20')},
+  {s:'r2s',n:'R2 Spiegeltest', d:new Date('2026-05-06')},
+  {s:'r3a',n:'R3 Aanlevering', d:new Date('2026-05-25')},
+  {s:'r3s',n:'R3 Spiegeltest', d:new Date('2026-06-09')},
+  {s:'r4a',n:'R4 Aanlevering', d:new Date('2026-08-24')},
+  {s:'r4s',n:'R4 Spiegeltest', d:new Date('2026-09-07')},
+  {s:'r5a',n:'R5 Aanlevering', d:new Date('2026-09-28')},
+  {s:'r5s',n:'R5 Spiegeltest', d:new Date('2026-10-12')},
+  {s:'lg',n:'Livegang', d:new Date('2027-02-05')},
+];
+const DOMEINEN = [
+  {id:1,n:'Patiënt en zorglogistiek',k:'#007062',wgs:['WG Paramedische en Revalidatieplanning','WG Patiënt','WG Poliklinisch proces','WG Verslag','WG Zorgplatform','WG Zorgportaal','WG Zorgportaal techniek']},
+  {id:2,n:'EPD',k:'#1a6fa8',wgs:['WG EPD Beschouwend Groot','WG EPD Beschouwend Klein','WG EPD Cardiologie','WG EPD Groot Snijdend','WG EPD Klein Snijdend','WG EPD Longgeneeskunde/Neurologie/Neurochirurgie','WG EPD Paramedisch, sport & revalidatie','WG EPD Pijngeneeskunde','WG EPD Vrouw en Kind','WG Klinische genetica']},
+  {id:3,n:'Kliniek',k:'#2d7a3a',wgs:['WG A-team','WG EPD Verpleegkundig dossier','WG Infectiepreventie','WG Nazorg','WG SAZU (CS-SEH)','WG Voeding','WG Dagbehandeling (OBC)','WG Preop','WG OK','WG Opname','WG Steriel - CSA']},
+  {id:4,n:'PDMS IC & OK',k:'#5c3c92',wgs:['WG PDMS (Techniek)','WG PDMS IC','WG PDMS OK']},
+  {id:5,n:'Diagnostiek en beeld',k:'#c0792b',wgs:['WG Endoscopie','WG Functie','WG Multimedia','WG Order (bloedtransfusie)','WG Order KCL/MMB/PA','WG Radiologie & NG']},
+  {id:6,n:'Radiotherapie',k:'#b52525',wgs:['WG Radiotherapie (Functioneel)','WG Radiotherapie (Techniek)']},
+  {id:7,n:'Oncolytica, medicatie en Apotheek',k:'#7a5c00',wgs:['WG Bereidingen','WG Behandeling - Cytostatica','WG EVS (incl. antistolling) + WG Clinical Rules','WG Logistiek (Apotheek)','WG Poliklinische apotheek','WG Infusie']},
+  {id:8,n:'Financieel, Sturing en verantwoording',k:'#4a4a4a',wgs:['AG Stamtabellen (zkh)','WG Capaciteitsmanagement','WG Data- en stuurinformatie','WG DCR/LBZ','WG Episode / Validatie','WG Factuur','WG Research','WG Verrichtingenthesaurus']},
+];
+const MMAP = {"AGENDA":{"d":1,"w":"WG Poliklinisch proces"},"ALLERGIE":{"d":7,"w":"WG EVS (incl. antistolling) + WG Clinical Rules"},"AMBULANT":{"d":8,"w":"WG Factuur"},"APOTHEEK":{"d":7,"w":"WG Logistiek (Apotheek)"},"CONSULT":{"d":2,"w":"WG EPD Beschouwend Klein"},"CONTACT":{"d":1,"w":"WG Patiënt"},"CSZISLIB":{"d":8,"w":"AG Stamtabellen (zkh)"},"DOSSIER":{"d":2,"w":"WG EPD Beschouwend Groot"},"ECONSULT":{"d":1,"w":"WG Zorgportaal"},"EPISODE":{"d":8,"w":"WG Episode / Validatie"},"FAKTUUR":{"d":8,"w":"WG Factuur"},"HAAS":{"d":1,"w":"WG Zorgplatform"},"LAB":{"d":5,"w":"WG Order KCL/MMB/PA"},"LOGISTK":{"d":7,"w":"WG Logistiek (Apotheek)"},"METINGEN":{"d":4,"w":"WG PDMS (Techniek)"},"MULTIMED":{"d":5,"w":"WG Multimedia"},"OK":{"d":3,"w":"WG OK"},"OPNAME":{"d":3,"w":"WG Opname"},"ORDERCOM":{"d":2,"w":"WG EPD Beschouwend Groot"},"ORDERLAB":{"d":5,"w":"WG Order KCL/MMB/PA"},"PATIENT":{"d":1,"w":"WG Patiënt"},"RONTGEN":{"d":5,"w":"WG Radiologie & NG"},"ROUTEER":{"d":1,"w":"WG Patiënt"},"RTH":{"d":6,"w":"WG Radiotherapie (Functioneel)"},"STERIEL":{"d":3,"w":"WG Steriel - CSA"},"VRLIJST":{"d":2,"w":"WG EPD Beschouwend Groot"},"WEBAGEN":{"d":1,"w":"WG Zorgportaal"},"WI":{"d":1,"w":"WG Verslag"},"ZISCON":{"d":8,"w":"AG Stamtabellen (zkh)"}};
+const NAME_MAP = {"AVL_ALLERGIE_CAUSMETH_CODE":{"d":7,"w":"WG EVS (incl. antistolling) + WG Clinical Rules"},"AVL_ALLERGIE_ERNST_ID":{"d":7,"w":"WG EVS (incl. antistolling) + WG Clinical Rules"},"AVL_AMBULANT_AMBVERS_BRON":{"d":8,"w":"WG Factuur"},"AVL_DOSSIER_CMPERNST_NEWCODE":{"d":8,"w":"WG DCR/LBZ"},"AVL_DOSSIER_DCRLNKREG_ID":{"d":8,"w":"WG DCR/LBZ"},"AVL_DOSSIER_DIAGRELS_CODE":{"d":2,"w":"WG EPD Beschouwend Groot"},"AVL_DOSSIER_SUBDOSS_CODE":{"d":2,"w":"WG EPD Beschouwend Groot"},"AVL_HAAS_XENTPRACT_DEF_ID":{"d":1,"w":"WG Zorgplatform"},"AVL_METINGEN_PARAMS_PARAMID":{"d":4,"w":"WG PDMS (Techniek)"},"AVL_ORDERCOM_ORDCAT_CATEGORIE":{"d":2,"w":"WG EPD Beschouwend Groot"},"AVL_ORDERCOM_ORDSTAT_STATUSCODE":{"d":2,"w":"WG EPD Beschouwend Groot"},"AVL_WI_ADRALIAS_ID":{"d":8,"w":"AG Stamtabellen (zkh)"},"AVL_WI_DOCCAT_ID":{"d":1,"w":"WG Verslag"}};
+
+// ═══════════════════════════════════════
+// STAAT
+// ═══════════════════════════════════════
+let alleSnapshots=[], huidigRijen=[], sortK='tomap', sortA=false, huidigHistTab=0;
+
+// ═══════════════════════════════════════
+// PARSING
+// ═══════════════════════════════════════
+function parseGetal(s){const m=(s||'').trim().match(/^(\d+)/);return m?parseInt(m[1]):0;}
+function parseTxt(tekst,datum){
+  const rijen=[];
+  for(let r of tekst.split('\n')){
+    r=r.trim(); if(!r)continue;
+    const prob=r.startsWith('!'); if(prob)r=r.slice(1).trim();
+    const d=r.split('\t').map(s=>s.trim());
+    if(d.length<7)continue;
+    const nm=d[0],mod=d[1];
+    if(!nm||!mod||nm==='Naam'||mod==='Module')continue;
+    const mp=NAME_MAP[nm]||MMAP[mod.toUpperCase()]||{d:8,w:'AG Stamtabellen (zkh)'};
+    const dom=DOMEINEN.find(x=>x.id===mp.d);
+    rijen.push({name:nm,module:mod.toUpperCase(),
+      total:parseGetal(d[2]),probleem:parseGetal(d[3]),tomap:parseGetal(d[4]),
+      check:parseGetal(d[5]),approved:parseGetal(d[6]),
+      heeftProbleem:prob||parseGetal(d[3])>0,
+      domain:mp.d,domNaam:dom?dom.n:'Onbekend',wg:mp.w,datum});
+  }
+  return rijen;
+}
+function datumUitNaam(n){const m=n.match(/(\d{4})(\d{2})(\d{2})/);return m?`${m[1]}-${m[2]}-${m[3]}`:new Date().toISOString().slice(0,10);}
+
+// ═══════════════════════════════════════
+// HULPFUNCTIES
+// ═══════════════════════════════════════
+function fmt(n){return Number(n).toLocaleString('nl-NL');}
+function pct(a,b){return b?Math.round(a/b*100)+'%':'0%';}
+function set(id,v){const e=document.getElementById(id);if(e)e.textContent=v;}
+function dfmt(s){const[j,m,d]=s.split('-');return`${d}-${m}-${j}`;}
+function dkort(d){return d.toLocaleDateString('nl-NL',{day:'2-digit',month:'2-digit',year:'2-digit'});}
+function delta(v,toon_pijl){
+  if(v===0)return`<span class="dnul">—</span>`;
+  const cls=v>0?'dpos':'dneg', pijl=v>0?'▲':'▼';
+  return`<span class="${cls}">${toon_pijl?pijl+' ':''}${fmt(Math.abs(v))}</span>`;
+}
+function deltaStr(v){if(v===0)return'<span class="dnul">—</span>';return`<span class="${v>0?'dpos':'dneg'}">${v>0?'▲ +'+fmt(v):'▼ '+fmt(v)}</span>`;}
+
+// ═══════════════════════════════════════
+// INITIALISEER
+// ═══════════════════════════════════════
+function initialiseer(){
+  const ls=alleSnapshots[alleSnapshots.length-1];
+  huidigRijen=ls.rijen;
+  const b=document.getElementById('hdrBadge');
+  if(b)b.textContent=`Laatste update: ${dfmt(ls.datum)} · ${alleSnapshots.length} snapshot(s)`;
+  const ws=document.getElementById('welkom'); if(ws)ws.style.display='none';
+  const dm=document.getElementById('dashMain'); if(dm)dm.style.display='block';
+  tekenMijlpalen();
+  bouwFilters();
+  renderKPIs(huidigRijen);
+  renderGrid(huidigRijen);
+  renderTabel(huidigRijen);
+}
+
+// ═══════════════════════════════════════
+// MIJLPALEN
+// ═══════════════════════════════════════
+function tekenMijlpalen(){
+  const rij=document.getElementById('mjrij');
+  if(!rij||rij.children.length)return;
+  const st=new Date('2026-02-27'),en=MIJLPALEN[MIJLPALEN.length-1].d;
+  document.getElementById('tjv').style.width=Math.min(100,Math.max(0,(VANDAAG-st)/(en-st)*100))+'%';
+  let vg=false;
+  MIJLPALEN.forEach(m=>{
+    const df=Math.round((m.d-VANDAAG)/86400000),iv=df<0,ih=!iv&&!vg;
+    if(ih){vg=true;set('vmj',`Eerstvolgende: ${m.n} — ${df===0?'vandaag!':'over '+df+' dag'+(df===1?'':'en')}`);}
+    let kls='mjd '+(iv?'vrl':ih?'hud':'toe'); if(m.s==='lg')kls+=' lg';
+    let tag='';
+    if(iv)tag=`<span class="dt dt-vrl">${Math.abs(df)}d geleden</span>`;
+    else if(df===0)tag='<span class="dt dt-urg">Vandaag</span>';
+    else if(df<=7)tag=`<span class="dt dt-urg">nog ${df}d</span>`;
+    else if(df<=30)tag=`<span class="dt dt-bin">nog ${df}d</span>`;
+    else if(m.s==='lg')tag=`<span class="dt dt-lg">nog ${df}d</span>`;
+    else tag=`<span class="dt dt-toe">nog ${df}d</span>`;
+    const el=document.createElement('div');el.className='mji';
+    el.innerHTML=`<div class="mjn">${m.n}</div><div class="${kls}">${iv?'✓':ih?'◉':''}</div><div class="mjdt">${dkort(m.d)}</div>${tag}`;
+    rij.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════
+// KPIs
+// ═══════════════════════════════════════
+function renderKPIs(r){
+  const T=r.reduce((s,x)=>s+x.total,0),A=r.reduce((s,x)=>s+x.approved,0),
+        C=r.reduce((s,x)=>s+x.check,0),M=r.reduce((s,x)=>s+x.tomap,0),
+        P=r.reduce((s,x)=>s+x.probleem,0);
+  set('kT',fmt(T));set('kTb',r.length);
+  set('kA',fmt(A));set('kAs',pct(A,T)+' van totaal');
+  set('kC',fmt(C));set('kCs',pct(C,T)+' van totaal');
+  set('kM',fmt(M));set('kMs',pct(M,T)+' van totaal');
+  set('kP',fmt(P));set('kPs',r.filter(x=>x.heeftProbleem).length+' tabellen met problemen');
+}
+
+// ═══════════════════════════════════════
+// FILTERS
+// ═══════════════════════════════════════
+function bouwFilters(){
+  const ds=document.getElementById('fD'),ms=document.getElementById('fM');
+  while(ds.options.length>1)ds.remove(1);
+  while(ms.options.length>1)ms.remove(1);
+  DOMEINEN.forEach(d=>{const o=document.createElement('option');o.value=d.id;o.textContent=`D${d.id} – ${d.n}`;ds.appendChild(o);});
+  [...new Set(huidigRijen.map(r=>r.module))].sort().forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;ms.appendChild(o);});
+  vulWG('');
+}
+function vulWG(did){
+  const sel=document.getElementById('fW'),cur=sel.value;
+  while(sel.options.length>1)sel.remove(1);
+  const dom=did?DOMEINEN.find(d=>d.id==did):null;
+  const wgs=dom?dom.wgs:[...new Set(DOMEINEN.flatMap(d=>d.wgs))].sort();
+  wgs.forEach(w=>{const o=document.createElement('option');o.value=w;o.textContent=w;sel.appendChild(o);});
+  sel.value=(dom&&!dom.wgs.includes(cur))?'':cur;
+}
+function gf(){
+  const df=document.getElementById('fD').value,wf=document.getElementById('fW').value,
+        mf=document.getElementById('fM').value,zf=document.getElementById('fZ').value.toLowerCase();
+  return huidigRijen.filter(r=>{
+    if(df&&r.domain!=df)return false;
+    if(wf&&r.wg!==wf)return false;
+    if(mf&&r.module!==mf)return false;
+    if(zf&&!r.name.toLowerCase().includes(zf)&&!r.module.toLowerCase().includes(zf))return false;
+    return true;
+  });
+}
+function fw(){vulWG(document.getElementById('fD').value);const f=gf();renderKPIs(f);renderGrid(f);renderTabel(f);}
+function rf(){['fD','fW','fM'].forEach(id=>document.getElementById(id).value='');document.getElementById('fZ').value='';fw();}
+
+// ═══════════════════════════════════════
+// DOMEIN GRID
+// ═══════════════════════════════════════
+function renderGrid(rijen){
+  const g=document.getElementById('domGrid');g.innerHTML='';
+  DOMEINEN.forEach(d=>{
+    const dr=rijen.filter(r=>r.domain===d.id);if(!dr.length)return;
+    const T=dr.reduce((s,r)=>s+r.total,0),A=dr.reduce((s,r)=>s+r.approved,0),
+          C=dr.reduce((s,r)=>s+r.check,0),M=dr.reduce((s,r)=>s+r.tomap,0),
+          PB=dr.filter(r=>r.heeftProbleem).length;
+    const ws={};
+    d.wgs.forEach(w=>{const wr=dr.filter(r=>r.wg===w);if(!wr.length)return;
+      ws[w]={t:wr.reduce((s,r)=>s+r.total,0),a:wr.reduce((s,r)=>s+r.approved,0),p:wr.filter(r=>r.heeftProbleem).length};});
+    const k=document.createElement('div');k.className='dk';
+    k.innerHTML=`
+      <div class="dkh">
+        <div class="dba" style="background:${d.k}">D${d.id}</div>
+        <div style="flex:1"><div class="dn">${d.n}</div><div class="dm">${Object.keys(ws).length} werkgroepen · ${dr.length} tabellen</div></div>
+        ${PB?`<span class="pb">&#9888; ${PB}</span>`:''}
+      </div>
+      <div class="dkb">
+        <div class="dstat">
+          <div><div class="dv">${fmt(T)}</div><div class="dl">Totaal</div></div>
+          <div><div class="dv g">${pct(A,T)}</div><div class="dl">Geaccordeerd</div></div>
+          <div><div class="dv a">${pct(C,T)}</div><div class="dl">Te controleren</div></div>
+          <div><div class="dv r">${pct(M,T)}</div><div class="dl">Te mappen</div></div>
+        </div>
+        <div class="ps">
+          <div class="psg g" style="width:${T?A/T*100:0}%"></div>
+          <div class="psg a" style="width:${T?C/T*100:0}%"></div>
+          <div class="psg r" style="width:${T?M/T*100:0}%"></div>
+        </div>
+        <div class="leg">
+          <div class="li"><div class="lb" style="background:#007062"></div>Geaccordeerd</div>
+          <div class="li"><div class="lb" style="background:#d4870a"></div>Te controleren</div>
+          <div class="li"><div class="lb" style="background:#c0392b"></div>Te mappen</div>
+        </div>
+        <div class="wgl">${Object.entries(ws).map(([w,s])=>`
+          <div class="wgr" onclick="filtNaarWG(${d.id},'${w.replace(/'/g,"\\'")}')">
+            <span class="wgn">${w}</span>
+            ${s.p?'<span class="pb" style="font-size:10px;padding:1px 6px">!</span>':''}
+            <div class="wgb"><div class="wgf" style="width:${s.t?s.a/s.t*100:0}%"></div></div>
+            <span class="wgp">${pct(s.a,s.t)}</span>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    g.appendChild(k);
+  });
+  if(!g.children.length)g.innerHTML='<div class="leeg" style="grid-column:1/-1"><h3>Geen resultaten</h3><p>Pas de filters aan.</p></div>';
+}
+function filtNaarWG(did,wg){
+  document.getElementById('fD').value=did;vulWG(did);
+  document.getElementById('fW').value=wg;wisselW('detail');fw();
+}
+
+// ═══════════════════════════════════════
+// DETAIL TABEL
+// ═══════════════════════════════════════
+function renderTabel(rijen){
+  const ges=[...rijen].sort((a,b)=>{let av=a[sortK],bv=b[sortK];if(typeof av==='string'){av=av.toLowerCase();bv=bv.toLowerCase();}return sortA?(av>bv?1:-1):(av<bv?1:-1);});
+  const lijf=document.getElementById('dtLijf');lijf.innerHTML='';
+  set('rijTl',rijen.length+' rijen');
+  ges.forEach(r=>{
+    const d=DOMEINEN.find(x=>x.id===r.domain);
+    const tr=document.createElement('tr');if(r.heeftProbleem)tr.classList.add('hp');
+    tr.innerHTML=`
+      <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;font-family:'Courier New',monospace" title="${r.name}">${r.name}</td>
+      <td><span class="tm">${r.module}</span></td>
+      <td><span class="td2" style="background:${d?d.k+'18':'#eee'};color:${d?d.k:'#666'}">D${r.domain} ${d?d.n:''}</span></td>
+      <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.wg}</td>
+      <td class="num">${fmt(r.total)}</td>
+      <td><div class="mpw"><div class="mpb"><div class="mpf g" style="width:${r.total?r.approved/r.total*100:0}%"></div></div><span class="num" style="color:#007062">${pct(r.approved,r.total)}</span></div></td>
+      <td><div class="mpw"><div class="mpb"><div class="mpf a" style="width:${r.total?r.check/r.total*100:0}%"></div></div><span class="num" style="color:#d4870a">${pct(r.check,r.total)}</span></div></td>
+      <td><div class="mpw"><div class="mpb"><div class="mpf r" style="width:${r.total?r.tomap/r.total*100:0}%"></div></div><span class="num" style="color:${r.tomap>0?'#c0392b':'#999'}">${pct(r.tomap,r.total)}</span></div></td>
+      <td>${r.probleem>0?`<span style="color:#c0392b;font-weight:700">${fmt(r.probleem)}</span>`:'<span style="color:#bbb">—</span>'}</td>`;
+    lijf.appendChild(tr);
+  });
+}
+function sortT(k){if(sortK===k)sortA=!sortA;else{sortK=k;sortA=false;}renderTabel(gf());}
+
+// ═══════════════════════════════════════
+// WEERGAVE WISSELEN
+// ═══════════════════════════════════════
+function wisselW(v){
+  document.getElementById('vD').style.display  =v==='domein'  ?'block':'none';
+  document.getElementById('vDt').style.display =v==='detail'  ?'block':'none';
+  document.getElementById('vH').style.display  =v==='historie'?'block':'none';
+  ['Domein','Detail','Hist'].forEach(n=>document.getElementById('btn'+n).classList.toggle('on',v===n.toLowerCase()));
+  if(v==='historie')renderHistorie(huidigHistTab);
+}
+
+// ═══════════════════════════════════════
+// ── UITGEBREIDE HISTORIE ──
+// ═══════════════════════════════════════
+function snapPunt(s){
+  const T=s.rijen.reduce((x,r)=>x+r.total,0),
+        A=s.rijen.reduce((x,r)=>x+r.approved,0),
+        C=s.rijen.reduce((x,r)=>x+r.check,0),
+        M=s.rijen.reduce((x,r)=>x+r.tomap,0),
+        P=s.rijen.reduce((x,r)=>x+r.probleem,0);
+  return{datum:s.datum,label:s.datum.slice(5).replace('-','/'),
+    T,A,C,M,P,
+    aPct:T?Math.round(A/T*100):0,
+    cPct:T?Math.round(C/T*100):0,
+    mPct:T?Math.round(M/T*100):0,
+  };
+}
+
+function renderHistorie(tabIdx){
+  huidigHistTab=tabIdx||0;
+  const el=document.getElementById('histInhoud');
+  set('histSnaps',alleSnapshots.length+' snapshot(s)');
+  if(alleSnapshots.length<2){
+    el.innerHTML='<div class="gh">&#128197; Laad meerdere bestanden om de historische analyse te zien.<br><small>Selecteer meerdere mapping-JJJJMMDD.txt bestanden via de importknop.</small></div>';
+    return;
+  }
+  const pnts=alleSnapshots.map(snapPunt);
+  // tab navigation
+  const tabs=[
+    {id:'t0',lbl:'📈 Percentage'},
+    {id:'t1',lbl:'🔢 Absolute aantallen'},
+    {id:'t2',lbl:'↕ Groei & verschuiving'},
+    {id:'t3',lbl:'📋 Snapshot vergelijking'},
+  ];
+  el.innerHTML=`
+    <div class="hist-tabs" id="histTabs">
+      ${tabs.map((t,i)=>`<div class="hist-tab${i===huidigHistTab?' on':''}" onclick="renderHistorie(${i})">${t.lbl}</div>`).join('')}
+    </div>
+    <div id="histPnl"></div>`;
+  const pnl=document.getElementById('histPnl');
+  if(huidigHistTab===0) renderHistPct(pnl,pnts);
+  else if(huidigHistTab===1) renderHistAbs(pnl,pnts);
+  else if(huidigHistTab===2) renderHistDelta(pnl,pnts);
+  else if(huidigHistTab===3) renderHistSnaps(pnl,pnts);
+}
+
+// ── SVG helpers ──
+function svgBasis(pnts,keyFn,maxVal,hoogte){
+  const W=900,H=hoogte||260,PL=62,PR=30,PT=20,PB=42;
+  const GW=W-PL-PR,GH=H-PT-PB,N=pnts.length;
+  const cx=i=>PL+(N===1?GW/2:i/(N-1)*GW);
+  const cy=v=>PT+GH-(v/maxVal)*GH;
+  return{W,H,PL,PR,PT,PB,GW,GH,N,cx,cy};
+}
+function yGrid(cx,cy,GW,PL,PT,vals,suffix){
+  return vals.map(v=>`
+    <line x1="${PL}" y1="${cy(v)}" x2="${PL+GW}" y2="${cy(v)}" stroke="${v===0?'#c0c0ba':'#e8e8e5'}" stroke-width="${v===0?1.5:1}"/>
+    <text x="${PL-8}" y="${cy(v)+4}" text-anchor="end" font-family="Arial,sans-serif" font-size="10" fill="#6b6b65">${v}${suffix||''}</text>`).join('');
+}
+function xGrid(pnts,cx,H,PB){
+  const N=pnts.length;
+  return pnts.map((p,i)=>{
+    if(N>16&&i%Math.ceil(N/16)!==0)return'';
+    return`<text x="${cx(i)}" y="${H-PB+16}" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.5" fill="#6b6b65">${p.label}</text>`;
+  }).join('');
+}
+function lijn(pnts,cx,cy,key,kleur,breedte){
+  const pts=pnts.map((p,i)=>`${cx(i)},${cy(p[key])}`).join(' ');
+  return`<polyline points="${pts}" fill="none" stroke="${kleur}" stroke-width="${breedte||2.2}" stroke-linejoin="round" stroke-linecap="round"/>`;
+}
+function area(pnts,cx,cy,key,kleur){
+  const top=pnts.map((p,i)=>`${cx(i)},${cy(p[key])}`).join(' ');
+  const N=pnts.length;
+  return`<polygon points="${top} ${cx(N-1)},${cy(0)} ${cx(0)},${cy(0)}" fill="${kleur}" fill-opacity="0.07"/>`;
+}
+function dots(pnts,cx,cy,key,kleur,si,extra){
+  return pnts.map((p,i)=>`<circle class="dp" cx="${cx(i)}" cy="${cy(p[key])}" r="4" fill="${kleur}" stroke="#fff" stroke-width="1.5" data-s="${si}" data-i="${i}" ${extra||''}/>` ).join('');
+}
+function assen(PL,PT,cx,cy,N){
+  return`<line x1="${PL}" y1="${cy(0)}" x2="${PL+(N>1?900-PL-30:400)}" y2="${cy(0)}" stroke="#c0c0ba" stroke-width="1.5"/>
+         <line x1="${PL}" y1="${PT}" x2="${PL}" y2="${cy(0)}" stroke="#c0c0ba" stroke-width="1.5"/>`;
+}
+function svgWrap(inner,W,H,N){
+  return`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="height:${H}px;min-width:${Math.max(W,N*40)}px">${inner}</svg>`;
+}
+function legenda(items){
+  return`<div class="leg" style="margin-bottom:14px">${items.map(([k,l])=>`<div class="li"><div class="lb" style="background:${k}"></div>${l}</div>`).join('')}</div>`;
+}
+function tooltipBind(pnts,series){
+  // series: [{key,kleur,naam,abs,pct}]
+  document.querySelectorAll('.dp').forEach(c=>{
+    c.addEventListener('mouseenter',function(e){
+      const i=parseInt(this.dataset.i),si=parseInt(this.dataset.s),p=window._hp[i];
+      const tip=document.getElementById('htTip');tip.style.opacity='1';
+      const s=series[si];
+      tip.innerHTML=`<strong style="color:${s.kleur}">${s.naam}</strong><br>
+        <span style="opacity:.8">${dfmt(p.datum)}</span><br>
+        ${series.map(x=>`<span style="color:${x.kleur}">${x.naam}:</span> ${x.pct?p[x.pct]+'% ('+fmt(p[x.abs])+')':fmt(p[x.abs])}`).join('<br>')}`;
+      tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-10)+'px';
+      this.setAttribute('r','6');
+    });
+    c.addEventListener('mousemove',function(e){
+      const t=document.getElementById('htTip');if(t){t.style.left=(e.clientX+14)+'px';t.style.top=(e.clientY-10)+'px';}
+    });
+    c.addEventListener('mouseleave',function(){
+      document.getElementById('htTip').style.opacity='0';this.setAttribute('r','4');
+    });
+  });
+}
+
+// ── Tab 0: Percentage lijngrafieken ──
+function renderHistPct(el,pnts){
+  window._hp=pnts;
+  const {W,H,PL,PR,PT,PB,GW,GH,N,cx,cy}=svgBasis(pnts,null,100,260);
+  const yv=[0,25,50,75,100];
+  const inner=yGrid(cx,cy,GW,PL,PT,yv,'%')
+    +area(pnts,cx,cy,'aPct','#007062')+area(pnts,cx,cy,'cPct','#d4870a')+area(pnts,cx,cy,'mPct','#c0392b')
+    +lijn(pnts,cx,cy,'aPct','#007062')+lijn(pnts,cx,cy,'cPct','#d4870a')+lijn(pnts,cx,cy,'mPct','#c0392b')
+    +dots(pnts,cx,cy,'aPct','#007062',0)+dots(pnts,cx,cy,'cPct','#d4870a',1)+dots(pnts,cx,cy,'mPct','#c0392b',2)
+    +xGrid(pnts,cx,H,PB)+assen(PL,PT,cx,cy,N);
+  el.innerHTML=`<div class="hist-pnl on">
+    ${legenda([['#007062','Geaccordeerd %'],['#d4870a','Te controleren %'],['#c0392b','Te mappen %']])}
+    <p style="font-size:11.5px;color:#6b6b65;margin-bottom:12px">Percentages t.o.v. het totaal per snapshot. Let op: een stijging in totaal kan het percentage doen dalen ondanks vooruitgang.</p>
+    <div class="lgw">${svgWrap(inner,W,H,N)}</div>
+  </div>`;
+  tooltipBind(pnts,[
+    {kleur:'#007062',naam:'Geaccordeerd',abs:'A',pct:'aPct'},
+    {kleur:'#d4870a',naam:'Te controleren',abs:'C',pct:'cPct'},
+    {kleur:'#c0392b',naam:'Te mappen',abs:'M',pct:'mPct'},
+  ]);
+}
+
+// ── Tab 1: Absolute aantallen ──
+function renderHistAbs(el,pnts){
+  window._hp=pnts;
+  const maxT=Math.max(...pnts.map(p=>p.T));
+  const maxVal=Math.ceil(maxT/10000)*10000||1000;
+  const {W,H,PL,PR,PT,PB,GW,GH,N,cx,cy}=svgBasis(pnts,null,maxVal,300);
+  // smart y-labels
+  const step=maxVal<=50000?5000:maxVal<=200000?25000:50000;
+  const yv=[];for(let v=0;v<=maxVal;v+=step)yv.push(v);
+  const fmtK=v=>v>=1000?Math.round(v/1000)+'k':v;
+  const yLabels=yv.map(v=>`
+    <line x1="${PL}" y1="${cy(v)}" x2="${PL+GW}" y2="${cy(v)}" stroke="${v===0?'#c0c0ba':'#e8e8e5'}" stroke-width="${v===0?1.5:1}"/>
+    <text x="${PL-8}" y="${cy(v)+4}" text-anchor="end" font-family="Arial,sans-serif" font-size="10" fill="#6b6b65">${fmtK(v)}</text>`).join('');
+  const inner=yLabels
+    +area(pnts,cx,cy,'T','#aaa')+area(pnts,cx,cy,'A','#007062')+area(pnts,cx,cy,'M','#c0392b')
+    +lijn(pnts,cx,cy,'T','#888',1.5)+lijn(pnts,cx,cy,'A','#007062')+lijn(pnts,cx,cy,'M','#c0392b')+lijn(pnts,cx,cy,'C','#d4870a',1.5)
+    +dots(pnts,cx,cy,'T','#888',3)+dots(pnts,cx,cy,'A','#007062',0)+dots(pnts,cx,cy,'C','#d4870a',1)+dots(pnts,cx,cy,'M','#c0392b',2)
+    +xGrid(pnts,cx,H,PB)+assen(PL,PT,cx,cy,N);
+  el.innerHTML=`<div class="hist-pnl on">
+    ${legenda([['#888','Totaal (dataset)'],['#007062','Geaccordeerd'],['#d4870a','Te controleren'],['#c0392b','Te mappen']])}
+    <p style="font-size:11.5px;color:#6b6b65;margin-bottom:12px">Absolute aantallen tonen of de dataset groeit en of het totaal nog-te-mappen daadwerkelijk afneemt, ook als het percentage stijgt.</p>
+    <div class="lgw">${svgWrap(inner,W,H,N)}</div>
+  </div>`;
+  tooltipBind(pnts,[
+    {kleur:'#007062',naam:'Geaccordeerd',abs:'A'},
+    {kleur:'#d4870a',naam:'Te controleren',abs:'C'},
+    {kleur:'#c0392b',naam:'Te mappen',abs:'M'},
+    {kleur:'#888',naam:'Totaal dataset',abs:'T'},
+  ]);
+}
+
+// ── Tab 2: Groei & verschuiving (delta tabel + grafiek) ──
+function renderHistDelta(el,pnts){
+  window._hp=pnts;
+  // Bereken week-op-week deltas
+  const deltas=pnts.slice(1).map((p,i)=>{
+    const prev=pnts[i];
+    return{
+      van:prev.datum, naar:p.datum, label:dfmt(prev.datum)+' → '+dfmt(p.datum),
+      dT:p.T-prev.T, dA:p.A-prev.A, dC:p.C-prev.C, dM:p.M-prev.M,
+      dAPct:p.aPct-prev.aPct, dMPct:p.mPct-prev.mPct,
+    };
+  });
+
+  // Delta-van-te-mappen lijngrafiek
+  const dMax=Math.max(1,...deltas.map(d=>Math.abs(d.dM)));
+  const scale=Math.ceil(dMax/500)*500||500;
+  const{W,H,PL,PR,PT,PB,GW,GH,N,cx,cy}=svgBasis(deltas,null,scale,200);
+  const cyD=v=>PT+GH/2-(v/scale)*(GH/2);  // centered at 0
+  const nul=PT+GH/2;
+  const midLine=`<line x1="${PL}" y1="${nul}" x2="${PL+GW}" y2="${nul}" stroke="#c0c0ba" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  const bars=deltas.map((d,i)=>{
+    const bh=Math.abs(d.dM/scale*(GH/2));
+    const by=d.dM>=0?nul-bh:nul;
+    const kleur=d.dM<=0?'#007062':'#c0392b';  // daling te mappen = groen!
+    return`<rect x="${cx(i)-8}" y="${by}" width="16" height="${Math.max(bh,1)}" fill="${kleur}" opacity="0.8"/>`;
+  }).join('');
+  const xLbls=deltas.map((d,i)=>`<text x="${cx(i)}" y="${H-PB+16}" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#6b6b65">${d.naar.slice(5).replace('-','/')}</text>`).join('');
+  const yLbls=[-scale,-scale/2,0,scale/2,scale].map(v=>`
+    <text x="${PL-8}" y="${cyD(v)+4}" text-anchor="end" font-family="Arial,sans-serif" font-size="10" fill="#6b6b65">${v>=0?'+':''  }${fmtK2(v)}</text>
+    <line x1="${PL}" y1="${cyD(v)}" x2="${PL+GW}" y2="${cyD(v)}" stroke="#e8e8e5" stroke-width="1"/>`).join('');
+  function fmtK2(v){return Math.abs(v)>=1000?(v>0?'+':'')+Math.round(v/1000)+'k':String(v);}
+  const svgD=svgWrap(yLbls+midLine+bars+xLbls+`<line x1="${PL}" y1="${PT}" x2="${PL}" y2="${PT+GH}" stroke="#c0c0ba" stroke-width="1.5"/>`,W,H,N);
+
+  // Delta tabel
+  const tblRows=deltas.map(d=>`<tr>
+    <td style="font-size:12px;white-space:nowrap">${d.label}</td>
+    <td class="num">${deltaStr(d.dT)}</td>
+    <td class="num">${deltaStr(d.dA)}</td>
+    <td class="num">${deltaStr(d.dC)}</td>
+    <td class="num" style="font-weight:700">${deltaStr(-d.dM)}</td>
+    <td class="num">${d.dMPct===0?'<span class="dnul">—</span>':`<span class="${d.dMPct<0?'dpos':'dneg'}">${d.dMPct<0?'▼ ':' ▲ '}${Math.abs(d.dMPct)}%</span>`}</td>
+    <td class="num">${deltaStr(d.dA-d.dT)}</td>
+  </tr>`).join('');
+
+  el.innerHTML=`<div class="hist-pnl on">
+    <p style="font-size:11.5px;color:#6b6b65;margin-bottom:14px">
+      Wekelijkse verschuiving. <span style="color:#007062;font-weight:700">Groen</span> = te-mappen daalt (vooruitgang). <span style="color:#c0392b;font-weight:700">Rood</span> = te-mappen stijgt (meer data of terugval).
+      <strong>Saldo</strong> = toegevoegde waarden minus geaccordeerde waarden.
+    </p>
+    <div class="lgw" style="margin-bottom:20px">${svgD}</div>
+    <div class="tw2">
+      <table class="delta-tbl">
+        <thead><tr>
+          <th>Periode</th>
+          <th>&#916; Dataset</th>
+          <th>&#916; Geaccordeerd</th>
+          <th>&#916; Te controleren</th>
+          <th>&#916; Te mappen &#9660;</th>
+          <th>&#916; % Te mappen</th>
+          <th>Saldo</th>
+        </tr></thead>
+        <tbody>${tblRows}</tbody>
+      </table>
+    </div>
+    <p style="font-size:11px;color:#6b6b65;margin-top:10px">Saldo = &#916; Geaccordeerd &minus; &#916; Dataset (positief = meer gemapped dan toegevoegd)</p>
+  </div>`;
+}
+
+// ── Tab 3: Snapshot vergelijking (eerste vs laatste + alle snaps) ──
+function renderHistSnaps(el,pnts){
+  const eerste=pnts[0],laatste=pnts[pnts.length-1];
+  const dT=laatste.T-eerste.T,dA=laatste.A-eerste.A,dM=laatste.M-eerste.M;
+  const weken=Math.round((new Date(laatste.datum)-new Date(eerste.datum))/604800000);
+  const perWeek=weken>0?Math.round(dA/weken):dA;
+
+  const kaarten=[
+    {lbl:'Totaal dataset',v:fmt(laatste.T),sub:deltaStr(dT)+' vs start',kls:''},
+    {lbl:'Geaccordeerd',v:fmt(laatste.A)+' ('+laatste.aPct+'%)',sub:deltaStr(dA)+' vs start',kls:'g'},
+    {lbl:'Te mappen',v:fmt(laatste.M)+' ('+laatste.mPct+'%)',sub:deltaStr(-dM)+' afname vs start',kls:dM<0?'g':'r'},
+    {lbl:'Snelheid (gem.)',v:fmt(perWeek)+'/week',sub:'geaccordeerd in '+weken+' w.',kls:''},
+    {lbl:'Snapshots',v:pnts.length,sub:`${dfmt(eerste.datum)} – ${dfmt(laatste.datum)}`,kls:''},
+  ];
+
+  // Alle snapshots tabel
+  const snapRijen=pnts.map((p,i)=>{
+    const prev=i>0?pnts[i-1]:null;
+    return`<tr>
+      <td style="white-space:nowrap;font-weight:700">${dfmt(p.datum)}</td>
+      <td class="num">${fmt(p.T)}${prev?` <small style="color:#aaa">(${deltaStr(p.T-prev.T)})</small>`:''}</td>
+      <td class="num" style="color:#007062">${fmt(p.A)} <small>(${p.aPct}%)</small>${prev?` <small style="color:#aaa">${deltaStr(p.A-prev.A)}</small>`:''}</td>
+      <td class="num" style="color:#d4870a">${fmt(p.C)} <small>(${p.cPct}%)</small></td>
+      <td class="num" style="color:#c0392b">${fmt(p.M)} <small>(${p.mPct}%)</small>${prev?` <small style="color:#aaa">${deltaStr(-(p.M-prev.M))}</small>`:''}</td>
+      <td class="num">${p.P>0?`<span style="color:#c0392b;font-weight:700">${fmt(p.P)}</span>`:'<span style="color:#bbb">—</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML=`<div class="hist-pnl on">
+    <div class="snap-krt" style="margin-bottom:20px">
+      ${kaarten.map(k=>`<div class="snap-k">
+        <div class="snap-d">${k.lbl}</div>
+        <div class="snap-v ${k.kls}">${k.v}</div>
+        <div class="snap-s">${k.sub}</div>
+      </div>`).join('')}
+    </div>
+    <div class="tw2">
+      <table class="delta-tbl">
+        <thead><tr>
+          <th>Datum</th><th>Totaal dataset</th><th>Geaccordeerd</th>
+          <th>Te controleren</th><th>Te mappen</th><th>Problemen</th>
+        </tr></thead>
+        <tbody>${snapRijen}</tbody>
+      </table>
+    </div>
+    <p style="font-size:11px;color:#6b6b65;margin-top:8px">&#916; = verschil t.o.v. vorige snapshot. Groen = verbetering, rood = verslechtering.</p>
+  </div>`;
+}
+
+
+window.addEventListener('DOMContentLoaded',function(){
+  var fb=document.getElementById('spFb'); if(fb)fb.style.display='none';
+  var de=document.getElementById('__DATA__'); if(!de)return;
+  try{alleSnapshots=JSON.parse(de.textContent);}catch(e){console.error(e);return;}
+  tekenMijlpalen();
+  initialiseer();
+});
+</script>
+<script id="__DATA__" type="application/json">[{"datum":"2026-03-23","bestand":"mapping-20260323.txt","rijen":[{"name":"AVL_CSZISLIB_TAAL_CODE","module":"CSZISLIB","total":8,"probleem":0,"tomap":0,"check":8,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_CSZISLIB_TBI_TBICODE","module":"CSZISLIB","total":52840,"probleem":58,"tomap":303,"check":4008,"approved":48471,"heeftProbleem":true,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_LOGISTK_CREDIT_CREDITNR","module":"LOGISTK","total":160,"probleem":0,"tomap":160,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_CSZISLIB_TITEL_CODE","module":"CSZISLIB","total":7,"probleem":0,"tomap":0,"check":7,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_LOGISTK_GEVAARCAT_CATID","module":"LOGISTK","total":72,"probleem":0,"tomap":72,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_OPNAME_HERKOMST_CODE","module":"OPNAME","total":14,"probleem":0,"tomap":4,"check":10,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-23"},{"name":"AVL_DOSSIER_CMPERNST_NEWCODE","module":"DOSSIER","total":27,"probleem":0,"tomap":6,"check":0,"approved":21,"heeftProbleem":false,"domain":8,"wg":"WG DCR/LBZ","datum":"2026-03-23"},{"name":"AVL_LOGISTK_GEVAARIND_INDELID","module":"LOGISTK","total":21,"probleem":0,"tomap":21,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_DOSSIER_DCRLNKREG_ID","module":"DOSSIER","total":94,"probleem":0,"tomap":17,"check":77,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG DCR/LBZ","datum":"2026-03-23"},{"name":"AVL_LOGISTK_GEVARENPICT_CODE","module":"LOGISTK","total":10,"probleem":0,"tomap":10,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_DOSSIER_DIAGRELS_CODE","module":"DOSSIER","total":54,"probleem":0,"tomap":18,"check":36,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-23"},{"name":"AVL_LOGISTK_INSTITUUT_CODE","module":"LOGISTK","total":3,"probleem":2,"tomap":0,"check":3,"approved":0,"heeftProbleem":true,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_LOGISTK_LEVERWYZ_CODE","module":"LOGISTK","total":5,"probleem":0,"tomap":0,"check":5,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_STERIEL_NEWSTATUS_CODE","module":"STERIEL","total":6,"probleem":0,"tomap":0,"check":0,"approved":6,"heeftProbleem":false,"domain":3,"wg":"WG Steriel - CSA","datum":"2026-03-23"},{"name":"AVL_OPNAME_OPNCODE_CODE","module":"OPNAME","total":10,"probleem":0,"tomap":0,"check":10,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-23"},{"name":"AVL_DOSSIER_SUBDOSS_CODE","module":"DOSSIER","total":6,"probleem":0,"tomap":0,"check":6,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-23"},{"name":"AVL_LOGISTK_PRSELGRP_GROEPCODE","module":"LOGISTK","total":3,"probleem":0,"tomap":3,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_OPNAME_OPNSUBTYPE_OPNTYPE","module":"OPNAME","total":27,"probleem":2,"tomap":2,"check":24,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-23"},{"name":"AVL_ECONSULT_POSTBOX_ID","module":"ECONSULT","total":1,"probleem":0,"tomap":0,"check":1,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Zorgportaal","datum":"2026-03-23"},{"name":"AVL_LOGISTK_RETOMSCH_CODE","module":"LOGISTK","total":7,"probleem":0,"tomap":7,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_OPNAME_OPNTYPE1_CODE","module":"OPNAME","total":17,"probleem":0,"tomap":17,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-23"},{"name":"AVL_LOGISTK_RETOURWZ_CODE","module":"LOGISTK","total":4,"probleem":0,"tomap":4,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_OPNAME_PLANANNULERIN_CODE","module":"OPNAME","total":14,"probleem":2,"tomap":0,"check":12,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-23"},{"name":"AVL_OPNAME_PLANONTSLR_CODE","module":"OPNAME","total":25,"probleem":2,"tomap":8,"check":15,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-23"},{"name":"AVL_EPISODE_TRIALCAT_CODE","module":"EPISODE","total":1,"probleem":0,"tomap":1,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Episode / Validatie","datum":"2026-03-23"},{"name":"AVL_ORDERCOM_ORDCAT_CATEGORIE","module":"ORDERCOM","total":200,"probleem":0,"tomap":140,"check":60,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-23"},{"name":"AVL_VRLIJST_VRLCAT_CODE","module":"VRLIJST","total":639,"probleem":0,"tomap":90,"check":549,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-23"},{"name":"AVL_LOGISTK_VRDMUTOMSCH_CODE","module":"LOGISTK","total":3,"probleem":0,"tomap":3,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_ORDERCOM_ORDSTAT_STATUSCODE","module":"ORDERCOM","total":524,"probleem":0,"tomap":520,"check":4,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-23"},{"name":"AVL_WEBAGEN_AGVRWCAT_ID","module":"WEBAGEN","total":72,"probleem":0,"tomap":10,"check":15,"approved":47,"heeftProbleem":false,"domain":1,"wg":"WG Zorgportaal","datum":"2026-03-23"},{"name":"AVL_FAKTUUR_BTW_BTWCODE","module":"FAKTUUR","total":7,"probleem":3,"tomap":0,"check":7,"approved":0,"heeftProbleem":true,"domain":8,"wg":"WG Factuur","datum":"2026-03-23"},{"name":"AVL_PATCODE_ISOLATIE_INDICATIE_CODE","module":"PATIENT","total":29,"probleem":0,"tomap":28,"check":1,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-23"},{"name":"AVL_WI_DOCCAT_ID","module":"WI","total":67,"probleem":0,"tomap":67,"check":0,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Verslag","datum":"2026-03-23"},{"name":"AVL_MULTIMED_DOCUTYPE_DOCTYPEID","module":"MULTIMED","total":162,"probleem":0,"tomap":99,"check":63,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-23"},{"name":"AVL_PATIENT_IDTYPES_IDTYPE","module":"PATIENT","total":6,"probleem":0,"tomap":2,"check":4,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-23"},{"name":"AVL_FAKTUUR_FINADMIN_ADMINCODE","module":"FAKTUUR","total":2,"probleem":0,"tomap":0,"check":2,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-23"},{"name":"AVL_PATIENT_OPTINTYP_CODE","module":"PATIENT","total":18,"probleem":1,"tomap":6,"check":12,"approved":0,"heeftProbleem":true,"domain":1,"wg":"WG Patiënt","datum":"2026-03-23"},{"name":"AVL_MULTIMED_MMSTATUS_CODE","module":"MULTIMED","total":6,"probleem":0,"tomap":2,"check":4,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-23"},{"name":"AVL_PATIENT_PATCODE_CODE","module":"PATIENT","total":29,"probleem":0,"tomap":26,"check":3,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-23"},{"name":"AVL_FAKTUUR_OPNTAR_OPNTARIEF","module":"FAKTUUR","total":17,"probleem":0,"tomap":9,"check":8,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-23"},{"name":"AVL_MULTIMED_MULCONF_CONFIGID","module":"MULTIMED","total":173,"probleem":0,"tomap":173,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-23"},{"name":"AVL_PATIENT_PATRELT_Code","module":"PATIENT","total":20,"probleem":0,"tomap":0,"check":20,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-23"},{"name":"AVL_ZISCON_DOMAIN_ID","module":"ZISCON","total":5,"probleem":0,"tomap":2,"check":3,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_PATIENT_RELPROP_CODE","module":"PATIENT","total":5,"probleem":3,"tomap":0,"check":5,"approved":0,"heeftProbleem":true,"domain":1,"wg":"WG Patiënt","datum":"2026-03-23"},{"name":"AVL_AGENDA_AGENLOC_CODE","module":"AGENDA","total":313,"probleem":0,"tomap":277,"check":36,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-23"},{"name":"AVL_ZISCON_GROEPEN_CODE","module":"ZISCON","total":334,"probleem":0,"tomap":334,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_FAKTUUR_TARAFD_CODE","module":"FAKTUUR","total":69,"probleem":0,"tomap":16,"check":53,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-23"},{"name":"AVL_AGENDA_BEHANDELDISC_CODE","module":"AGENDA","total":8,"probleem":0,"tomap":0,"check":8,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-23"},{"name":"AVL_ZISCON_USER_NAAM","module":"ZISCON","total":11824,"probleem":0,"tomap":0,"check":75,"approved":11749,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_MULTIMED_SUBCATGO_SUBCATGRID","module":"MULTIMED","total":104,"probleem":0,"tomap":104,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-23"},{"name":"AVL_RONTGEN_ROKAMER_CODE","module":"RONTGEN","total":137,"probleem":0,"tomap":137,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-23"},{"name":"AVL_ZISCON_USERFUNK_CODE","module":"ZISCON","total":1599,"probleem":0,"tomap":1599,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_RONTGEN_RONTLABO_CODE","module":"RONTGEN","total":451,"probleem":0,"tomap":451,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-23"},{"name":"AVL_AGENDA_MUTATIEREDEN_Code","module":"AGENDA","total":21,"probleem":0,"tomap":21,"check":0,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-23"},{"name":"AVL_ZISCON_USERSRT_CODE","module":"ZISCON","total":8,"probleem":0,"tomap":8,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_OK_ANATECH_CODE","module":"OK","total":158,"probleem":0,"tomap":158,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-23"},{"name":"MOSAIQ_RT_THERAPROP_TherapyPropertyID","module":"RTH","total":15,"probleem":0,"tomap":13,"check":2,"approved":0,"heeftProbleem":false,"domain":6,"wg":"WG Radiotherapie (Functioneel)","datum":"2026-03-23"},{"name":"AVL_RONTGEN_RONTLOC_CODE","module":"RONTGEN","total":5,"probleem":0,"tomap":5,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-23"},{"name":"AVL_AGENDA_SUBAGEND_SUBAGENDA","module":"AGENDA","total":4043,"probleem":0,"tomap":4043,"check":0,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-23"},{"name":"AVL_RONTGEN_VERRCODE_CODE","module":"RONTGEN","total":3992,"probleem":0,"tomap":3989,"check":3,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-23"},{"name":"AVL_ALLERGIE_CAUSMETH_CODE","module":"ALLERGIE","total":2,"probleem":0,"tomap":2,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG EVS (incl. antistolling) + WG Clinical Rules","datum":"2026-03-23"},{"name":"AVL_OK_ANNUREDE_CODE","module":"OK","total":15,"probleem":0,"tomap":5,"check":10,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-23"},{"name":"AVL_ALLERGIE_ERNST_ID","module":"ALLERGIE","total":4,"probleem":0,"tomap":4,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG EVS (incl. antistolling) + WG Clinical Rules","datum":"2026-03-23"},{"name":"AVL_OK_ARTIKEL_CODE","module":"OK","total":1,"probleem":0,"tomap":1,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-23"},{"name":"AVL_ROUTEER_RADRTYPE_ADRTYPEID","module":"ROUTEER","total":7,"probleem":0,"tomap":0,"check":7,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-23"},{"name":"AVL_AMBULANT_AMBVERS_BRON","module":"AMBULANT","total":36,"probleem":26,"tomap":0,"check":36,"approved":0,"heeftProbleem":true,"domain":8,"wg":"WG Factuur","datum":"2026-03-23"},{"name":"AVL_OK_ARTIKELGROEPEN_CODE","module":"OK","total":11,"probleem":0,"tomap":8,"check":3,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-23"},{"name":"AVL_OK_FUNKTIE_CODE","module":"OK","total":67,"probleem":0,"tomap":51,"check":16,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-23"},{"name":"AVL_RP_STATUSMUTREASON_ID","module":"OPNAME","total":18,"probleem":1,"tomap":0,"check":17,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-23"},{"name":"AVL_APOTHEEK_CONSBRON_CODE","module":"APOTHEEK","total":17,"probleem":0,"tomap":17,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_OK_LIGGING_CODE","module":"OK","total":21,"probleem":0,"tomap":4,"check":17,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-23"},{"name":"AVL_APOTHEEK_CONSREDEN_CODE","module":"APOTHEEK","total":31,"probleem":0,"tomap":31,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_OK_LOKATIE_CODE","module":"OK","total":4,"probleem":0,"tomap":0,"check":4,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-23"},{"name":"AVL_APOTHEEK_CONSTYPE_CODE","module":"APOTHEEK","total":9,"probleem":0,"tomap":0,"check":9,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_APOTHEEK_DELIMETH_Code","module":"APOTHEEK","total":12,"probleem":11,"tomap":0,"check":12,"approved":0,"heeftProbleem":true,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_OK_OKKAMERS_CODE","module":"OK","total":67,"probleem":0,"tomap":67,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-23"},{"name":"AVL_CONTACT_TYPETEL_TYPETEL","module":"CONTACT","total":11,"probleem":0,"tomap":11,"check":0,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-23"},{"name":"AVL_CSZISLIB_ARTS_ARTSCODE","module":"CSZISLIB","total":170313,"probleem":1453,"tomap":0,"check":1,"approved":168859,"heeftProbleem":true,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_HAAS_XENTPRACT_DEF_ID","module":"HAAS","total":476,"probleem":187,"tomap":0,"check":187,"approved":289,"heeftProbleem":true,"domain":1,"wg":"WG Zorgplatform","datum":"2026-03-23"},{"name":"AVL_OK_POSTOPBESTEMMING_CODE","module":"OK","total":1,"probleem":0,"tomap":0,"check":1,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-23"},{"name":"AVL_CSZISLIB_ARTSTYPE_CODE","module":"CSZISLIB","total":17,"probleem":0,"tomap":0,"check":17,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_LAB_BRON_BRONCODE","module":"LAB","total":10,"probleem":0,"tomap":10,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Order KCL/MMB/PA","datum":"2026-03-23"},{"name":"AVL_OK_PRIORITE_CODE","module":"OK","total":4,"probleem":0,"tomap":3,"check":1,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-23"},{"name":"AVL_CSZISLIB_BURGSTAA_CODE","module":"CSZISLIB","total":5,"probleem":0,"tomap":0,"check":5,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_OK_PROFCODE_CODE","module":"OK","total":34,"probleem":4,"tomap":5,"check":29,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG OK","datum":"2026-03-23"},{"name":"AVL_OK_SESAFWRD_CODE","module":"OK","total":8,"probleem":0,"tomap":1,"check":7,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-23"},{"name":"AVL_CSZISLIB_LAND_CODE","module":"CSZISLIB","total":254,"probleem":0,"tomap":254,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_LOGISTK_ARTGROEP_ARTGRPCD","module":"LOGISTK","total":14,"probleem":0,"tomap":14,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_OK_VERTR_CODE","module":"OK","total":97,"probleem":0,"tomap":97,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-23"},{"name":"AVL_CSZISLIB_LOCCODE_CODE","module":"CSZISLIB","total":10,"probleem":0,"tomap":0,"check":10,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_OPNAME_BEDDEN_BEDNR","module":"OPNAME","total":864,"probleem":0,"tomap":864,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-23"},{"name":"AVL_CSZISLIB_SPEC_SPECCODE","module":"CSZISLIB","total":57,"probleem":0,"tomap":7,"check":50,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-23"},{"name":"AVL_LOGISTK_BESTELTYPE_CODE","module":"LOGISTK","total":6,"probleem":0,"tomap":0,"check":6,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-23"},{"name":"AVL_OPNAME_BESTEM_CODE","module":"OPNAME","total":28,"probleem":10,"tomap":0,"check":19,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-23"},{"name":"AVL_METINGEN_PARAMS_PARAMID","module":"METINGEN","total":220,"probleem":0,"tomap":145,"check":46,"approved":29,"heeftProbleem":false,"domain":4,"wg":"WG PDMS (Techniek)","datum":"2026-03-23"},{"name":"AVL_FAKTUUR_CONTROLEINV_ID","module":"FAKTUUR","total":4,"probleem":0,"tomap":4,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-23"},{"name":"AVL_ORDERLAB_TESTCODE_TESTCODE","module":"ORDERLAB","total":6376,"probleem":0,"tomap":6376,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Order KCL/MMB/PA","datum":"2026-03-23"},{"name":"AVL_OPNAME_ANNREDEN_CODE","module":"OPNAME","total":18,"probleem":0,"tomap":0,"check":18,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-23"},{"name":"AVL_CONSULT_CATEGORY_CODE","module":"CONSULT","total":84,"probleem":0,"tomap":84,"check":0,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Klein","datum":"2026-03-23"}]},{"datum":"2026-03-25","bestand":"mapping-20260325.txt","rijen":[{"name":"AVL_CSZISLIB_TAAL_CODE","module":"CSZISLIB","total":8,"probleem":0,"tomap":0,"check":8,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_CSZISLIB_TBI_TBICODE","module":"CSZISLIB","total":52840,"probleem":58,"tomap":303,"check":4008,"approved":48471,"heeftProbleem":true,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_LOGISTK_CREDIT_CREDITNR","module":"LOGISTK","total":160,"probleem":0,"tomap":0,"check":0,"approved":160,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_CSZISLIB_TITEL_CODE","module":"CSZISLIB","total":7,"probleem":0,"tomap":0,"check":7,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_LOGISTK_GEVAARCAT_CATID","module":"LOGISTK","total":72,"probleem":0,"tomap":0,"check":0,"approved":72,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_OPNAME_HERKOMST_CODE","module":"OPNAME","total":14,"probleem":4,"tomap":0,"check":14,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-25"},{"name":"AVL_DOSSIER_CMPERNST_NEWCODE","module":"DOSSIER","total":27,"probleem":0,"tomap":6,"check":0,"approved":21,"heeftProbleem":false,"domain":8,"wg":"WG DCR/LBZ","datum":"2026-03-25"},{"name":"AVL_LOGISTK_GEVAARIND_INDELID","module":"LOGISTK","total":21,"probleem":0,"tomap":0,"check":0,"approved":21,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_DOSSIER_DCRLNKREG_ID","module":"DOSSIER","total":94,"probleem":0,"tomap":17,"check":77,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG DCR/LBZ","datum":"2026-03-25"},{"name":"AVL_LOGISTK_GEVARENPICT_CODE","module":"LOGISTK","total":10,"probleem":0,"tomap":0,"check":0,"approved":10,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_DOSSIER_DIAGRELS_CODE","module":"DOSSIER","total":54,"probleem":0,"tomap":18,"check":36,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-25"},{"name":"AVL_LOGISTK_INSTITUUT_CODE","module":"LOGISTK","total":3,"probleem":0,"tomap":0,"check":0,"approved":3,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_LOGISTK_LEVERWYZ_CODE","module":"LOGISTK","total":5,"probleem":0,"tomap":0,"check":0,"approved":5,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_STERIEL_NEWSTATUS_CODE","module":"STERIEL","total":6,"probleem":0,"tomap":0,"check":0,"approved":6,"heeftProbleem":false,"domain":3,"wg":"WG Steriel - CSA","datum":"2026-03-25"},{"name":"AVL_OPNAME_OPNCODE_CODE","module":"OPNAME","total":10,"probleem":0,"tomap":0,"check":10,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-25"},{"name":"AVL_DOSSIER_SUBDOSS_CODE","module":"DOSSIER","total":6,"probleem":0,"tomap":0,"check":6,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-25"},{"name":"AVL_LOGISTK_PRSELGRP_GROEPCODE","module":"LOGISTK","total":3,"probleem":0,"tomap":0,"check":0,"approved":3,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_OPNAME_OPNSUBTYPE_OPNTYPE","module":"OPNAME","total":27,"probleem":1,"tomap":2,"check":24,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-25"},{"name":"AVL_ECONSULT_POSTBOX_ID","module":"ECONSULT","total":1,"probleem":0,"tomap":0,"check":1,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Zorgportaal","datum":"2026-03-25"},{"name":"AVL_LOGISTK_RETOMSCH_CODE","module":"LOGISTK","total":7,"probleem":0,"tomap":0,"check":0,"approved":7,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_OPNAME_OPNTYPE1_CODE","module":"OPNAME","total":17,"probleem":0,"tomap":17,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-25"},{"name":"AVL_LOGISTK_RETOURWZ_CODE","module":"LOGISTK","total":4,"probleem":0,"tomap":0,"check":0,"approved":4,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_OPNAME_PLANANNULERIN_CODE","module":"OPNAME","total":14,"probleem":2,"tomap":0,"check":12,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-25"},{"name":"AVL_OPNAME_PLANONTSLR_CODE","module":"OPNAME","total":25,"probleem":2,"tomap":8,"check":15,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-25"},{"name":"AVL_EPISODE_TRIALCAT_CODE","module":"EPISODE","total":1,"probleem":0,"tomap":1,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Episode / Validatie","datum":"2026-03-25"},{"name":"AVL_ORDERCOM_ORDCAT_CATEGORIE","module":"ORDERCOM","total":200,"probleem":0,"tomap":0,"check":200,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-25"},{"name":"AVL_VRLIJST_VRLCAT_CODE","module":"VRLIJST","total":639,"probleem":0,"tomap":3,"check":636,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-25"},{"name":"AVL_LOGISTK_VRDMUTOMSCH_CODE","module":"LOGISTK","total":3,"probleem":0,"tomap":0,"check":0,"approved":3,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_ORDERCOM_ORDSTAT_STATUSCODE","module":"ORDERCOM","total":524,"probleem":0,"tomap":520,"check":4,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-25"},{"name":"AVL_WEBAGEN_AGVRWCAT_ID","module":"WEBAGEN","total":72,"probleem":0,"tomap":10,"check":15,"approved":47,"heeftProbleem":false,"domain":1,"wg":"WG Zorgportaal","datum":"2026-03-25"},{"name":"AVL_FAKTUUR_BTW_BTWCODE","module":"FAKTUUR","total":7,"probleem":3,"tomap":0,"check":7,"approved":0,"heeftProbleem":true,"domain":8,"wg":"WG Factuur","datum":"2026-03-25"},{"name":"AVL_PATCODE_ISOLATIE_INDICATIE_CODE","module":"PATIENT","total":29,"probleem":0,"tomap":28,"check":1,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-25"},{"name":"AVL_WI_DOCCAT_ID","module":"WI","total":67,"probleem":0,"tomap":0,"check":67,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Verslag","datum":"2026-03-25"},{"name":"AVL_MULTIMED_DOCUTYPE_DOCTYPEID","module":"MULTIMED","total":162,"probleem":0,"tomap":99,"check":63,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-25"},{"name":"AVL_PATIENT_IDTYPES_IDTYPE","module":"PATIENT","total":6,"probleem":0,"tomap":2,"check":4,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-25"},{"name":"AVL_FAKTUUR_FINADMIN_ADMINCODE","module":"FAKTUUR","total":2,"probleem":0,"tomap":0,"check":2,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-25"},{"name":"AVL_PATIENT_OPTINTYP_CODE","module":"PATIENT","total":18,"probleem":1,"tomap":6,"check":12,"approved":0,"heeftProbleem":true,"domain":1,"wg":"WG Patiënt","datum":"2026-03-25"},{"name":"AVL_MULTIMED_MMSTATUS_CODE","module":"MULTIMED","total":6,"probleem":0,"tomap":2,"check":4,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-25"},{"name":"AVL_PATIENT_PATCODE_CODE","module":"PATIENT","total":29,"probleem":0,"tomap":26,"check":3,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-25"},{"name":"AVL_FAKTUUR_OPNTAR_OPNTARIEF","module":"FAKTUUR","total":17,"probleem":0,"tomap":9,"check":8,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-25"},{"name":"AVL_MULTIMED_MULCONF_CONFIGID","module":"MULTIMED","total":173,"probleem":0,"tomap":173,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-25"},{"name":"AVL_PATIENT_PATRELT_Code","module":"PATIENT","total":20,"probleem":0,"tomap":0,"check":20,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-25"},{"name":"AVL_ZISCON_DOMAIN_ID","module":"ZISCON","total":5,"probleem":0,"tomap":2,"check":3,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_PATIENT_RELPROP_CODE","module":"PATIENT","total":5,"probleem":3,"tomap":0,"check":5,"approved":0,"heeftProbleem":true,"domain":1,"wg":"WG Patiënt","datum":"2026-03-25"},{"name":"AVL_AGENDA_AGENLOC_CODE","module":"AGENDA","total":313,"probleem":0,"tomap":277,"check":36,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-25"},{"name":"AVL_ZISCON_GROEPEN_CODE","module":"ZISCON","total":334,"probleem":0,"tomap":334,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_FAKTUUR_TARAFD_CODE","module":"FAKTUUR","total":69,"probleem":0,"tomap":16,"check":53,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-25"},{"name":"AVL_AGENDA_BEHANDELDISC_CODE","module":"AGENDA","total":8,"probleem":0,"tomap":0,"check":8,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-25"},{"name":"AVL_ZISCON_USER_NAAM","module":"ZISCON","total":11824,"probleem":0,"tomap":0,"check":75,"approved":11749,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_MULTIMED_SUBCATGO_SUBCATGRID","module":"MULTIMED","total":104,"probleem":0,"tomap":104,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-25"},{"name":"AVL_RONTGEN_ROKAMER_CODE","module":"RONTGEN","total":137,"probleem":0,"tomap":137,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-25"},{"name":"AVL_ZISCON_USERFUNK_CODE","module":"ZISCON","total":1599,"probleem":0,"tomap":1599,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_RONTGEN_RONTLABO_CODE","module":"RONTGEN","total":451,"probleem":0,"tomap":451,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-25"},{"name":"AVL_AGENDA_MUTATIEREDEN_Code","module":"AGENDA","total":21,"probleem":0,"tomap":21,"check":0,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-25"},{"name":"AVL_ZISCON_USERSRT_CODE","module":"ZISCON","total":8,"probleem":0,"tomap":8,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_OK_ANATECH_CODE","module":"OK","total":158,"probleem":0,"tomap":158,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-25"},{"name":"MOSAIQ_RT_THERAPROP_TherapyPropertyID","module":"RTH","total":15,"probleem":0,"tomap":13,"check":2,"approved":0,"heeftProbleem":false,"domain":6,"wg":"WG Radiotherapie (Functioneel)","datum":"2026-03-25"},{"name":"AVL_RONTGEN_RONTLOC_CODE","module":"RONTGEN","total":5,"probleem":0,"tomap":5,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-25"},{"name":"AVL_AGENDA_SUBAGEND_SUBAGENDA","module":"AGENDA","total":4043,"probleem":0,"tomap":4043,"check":0,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-25"},{"name":"AVL_RONTGEN_VERRCODE_CODE","module":"RONTGEN","total":3992,"probleem":0,"tomap":3989,"check":3,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-25"},{"name":"AVL_ALLERGIE_CAUSMETH_CODE","module":"ALLERGIE","total":2,"probleem":0,"tomap":2,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG EVS (incl. antistolling) + WG Clinical Rules","datum":"2026-03-25"},{"name":"AVL_OK_ANNUREDE_CODE","module":"OK","total":15,"probleem":0,"tomap":5,"check":10,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-25"},{"name":"AVL_ALLERGIE_ERNST_ID","module":"ALLERGIE","total":4,"probleem":0,"tomap":4,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG EVS (incl. antistolling) + WG Clinical Rules","datum":"2026-03-25"},{"name":"AVL_OK_ARTIKEL_CODE","module":"OK","total":1,"probleem":0,"tomap":1,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-25"},{"name":"AVL_ROUTEER_RADRTYPE_ADRTYPEID","module":"ROUTEER","total":7,"probleem":0,"tomap":0,"check":7,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-25"},{"name":"AVL_AMBULANT_AMBVERS_BRON","module":"AMBULANT","total":36,"probleem":26,"tomap":0,"check":36,"approved":0,"heeftProbleem":true,"domain":8,"wg":"WG Factuur","datum":"2026-03-25"},{"name":"AVL_OK_ARTIKELGROEPEN_CODE","module":"OK","total":11,"probleem":0,"tomap":8,"check":3,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-25"},{"name":"AVL_OK_FUNKTIE_CODE","module":"OK","total":67,"probleem":0,"tomap":51,"check":16,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-25"},{"name":"AVL_RP_STATUSMUTREASON_ID","module":"OPNAME","total":18,"probleem":1,"tomap":0,"check":17,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-25"},{"name":"AVL_APOTHEEK_CONSBRON_CODE","module":"APOTHEEK","total":17,"probleem":0,"tomap":0,"check":0,"approved":17,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_OK_LIGGING_CODE","module":"OK","total":21,"probleem":0,"tomap":4,"check":17,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-25"},{"name":"AVL_APOTHEEK_CONSREDEN_CODE","module":"APOTHEEK","total":31,"probleem":0,"tomap":0,"check":0,"approved":31,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_OK_LOKATIE_CODE","module":"OK","total":4,"probleem":0,"tomap":0,"check":4,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-25"},{"name":"AVL_APOTHEEK_CONSTYPE_CODE","module":"APOTHEEK","total":9,"probleem":0,"tomap":0,"check":0,"approved":9,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_APOTHEEK_DELIMETH_Code","module":"APOTHEEK","total":12,"probleem":11,"tomap":0,"check":12,"approved":0,"heeftProbleem":true,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_OK_OKKAMERS_CODE","module":"OK","total":67,"probleem":0,"tomap":67,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-25"},{"name":"AVL_CONTACT_TYPETEL_TYPETEL","module":"CONTACT","total":11,"probleem":0,"tomap":11,"check":0,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-25"},{"name":"AVL_CSZISLIB_ARTS_ARTSCODE","module":"CSZISLIB","total":170313,"probleem":1453,"tomap":0,"check":1,"approved":168859,"heeftProbleem":true,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_HAAS_XENTPRACT_DEF_ID","module":"HAAS","total":476,"probleem":187,"tomap":0,"check":187,"approved":289,"heeftProbleem":true,"domain":1,"wg":"WG Zorgplatform","datum":"2026-03-25"},{"name":"AVL_OK_POSTOPBESTEMMING_CODE","module":"OK","total":1,"probleem":0,"tomap":0,"check":1,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-25"},{"name":"AVL_CSZISLIB_ARTSTYPE_CODE","module":"CSZISLIB","total":17,"probleem":0,"tomap":0,"check":17,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_LAB_BRON_BRONCODE","module":"LAB","total":10,"probleem":0,"tomap":10,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Order KCL/MMB/PA","datum":"2026-03-25"},{"name":"AVL_OK_PRIORITE_CODE","module":"OK","total":4,"probleem":0,"tomap":3,"check":1,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-25"},{"name":"AVL_CSZISLIB_BURGSTAA_CODE","module":"CSZISLIB","total":5,"probleem":0,"tomap":0,"check":5,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_OK_PROFCODE_CODE","module":"OK","total":34,"probleem":4,"tomap":5,"check":29,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG OK","datum":"2026-03-25"},{"name":"AVL_OK_SESAFWRD_CODE","module":"OK","total":8,"probleem":0,"tomap":1,"check":7,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-25"},{"name":"AVL_CSZISLIB_LAND_CODE","module":"CSZISLIB","total":254,"probleem":0,"tomap":254,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_LOGISTK_ARTGROEP_ARTGRPCD","module":"LOGISTK","total":14,"probleem":0,"tomap":14,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_OK_VERTR_CODE","module":"OK","total":97,"probleem":0,"tomap":97,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-25"},{"name":"AVL_CSZISLIB_LOCCODE_CODE","module":"CSZISLIB","total":10,"probleem":0,"tomap":0,"check":10,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_OPNAME_BEDDEN_BEDNR","module":"OPNAME","total":864,"probleem":0,"tomap":864,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-25"},{"name":"AVL_CSZISLIB_SPEC_SPECCODE","module":"CSZISLIB","total":57,"probleem":0,"tomap":7,"check":50,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-25"},{"name":"AVL_LOGISTK_BESTELTYPE_CODE","module":"LOGISTK","total":6,"probleem":0,"tomap":0,"check":0,"approved":6,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-25"},{"name":"AVL_OPNAME_BESTEM_CODE","module":"OPNAME","total":28,"probleem":9,"tomap":0,"check":20,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-25"},{"name":"AVL_METINGEN_PARAMS_PARAMID","module":"METINGEN","total":220,"probleem":0,"tomap":145,"check":46,"approved":29,"heeftProbleem":false,"domain":4,"wg":"WG PDMS (Techniek)","datum":"2026-03-25"},{"name":"AVL_FAKTUUR_CONTROLEINV_ID","module":"FAKTUUR","total":4,"probleem":0,"tomap":4,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-25"},{"name":"AVL_ORDERLAB_TESTCODE_TESTCODE","module":"ORDERLAB","total":6376,"probleem":0,"tomap":6376,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Order KCL/MMB/PA","datum":"2026-03-25"},{"name":"AVL_OPNAME_ANNREDEN_CODE","module":"OPNAME","total":18,"probleem":0,"tomap":0,"check":18,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-25"},{"name":"AVL_CONSULT_CATEGORY_CODE","module":"CONSULT","total":84,"probleem":0,"tomap":84,"check":0,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Klein","datum":"2026-03-25"}]},{"datum":"2026-03-27","bestand":"mapping-20260327.txt","rijen":[{"name":"AVL_CSZISLIB_TAAL_CODE","module":"CSZISLIB","total":8,"probleem":0,"tomap":0,"check":8,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_CSZISLIB_TBI_TBICODE","module":"CSZISLIB","total":52840,"probleem":58,"tomap":303,"check":4008,"approved":48471,"heeftProbleem":true,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_LOGISTK_CREDIT_CREDITNR","module":"LOGISTK","total":160,"probleem":0,"tomap":0,"check":0,"approved":160,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_CSZISLIB_TITEL_CODE","module":"CSZISLIB","total":7,"probleem":0,"tomap":0,"check":7,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_LOGISTK_GEVAARCAT_CATID","module":"LOGISTK","total":72,"probleem":0,"tomap":0,"check":0,"approved":72,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_OPNAME_HERKOMST_CODE","module":"OPNAME","total":14,"probleem":4,"tomap":0,"check":14,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-27"},{"name":"AVL_DOSSIER_CMPERNST_NEWCODE","module":"DOSSIER","total":27,"probleem":0,"tomap":6,"check":0,"approved":21,"heeftProbleem":false,"domain":8,"wg":"WG DCR/LBZ","datum":"2026-03-27"},{"name":"AVL_LOGISTK_GEVAARIND_INDELID","module":"LOGISTK","total":21,"probleem":0,"tomap":0,"check":0,"approved":21,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_DOSSIER_DCRLNKREG_ID","module":"DOSSIER","total":94,"probleem":0,"tomap":17,"check":77,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG DCR/LBZ","datum":"2026-03-27"},{"name":"AVL_LOGISTK_GEVARENPICT_CODE","module":"LOGISTK","total":10,"probleem":0,"tomap":0,"check":0,"approved":10,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_DOSSIER_DIAGRELS_CODE","module":"DOSSIER","total":54,"probleem":0,"tomap":18,"check":36,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-27"},{"name":"AVL_LOGISTK_INSTITUUT_CODE","module":"LOGISTK","total":3,"probleem":0,"tomap":0,"check":0,"approved":3,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_LOGISTK_LEVERWYZ_CODE","module":"LOGISTK","total":5,"probleem":0,"tomap":0,"check":0,"approved":5,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_STERIEL_NEWSTATUS_CODE","module":"STERIEL","total":6,"probleem":0,"tomap":0,"check":0,"approved":6,"heeftProbleem":false,"domain":3,"wg":"WG Steriel - CSA","datum":"2026-03-27"},{"name":"AVL_OPNAME_OPNCODE_CODE","module":"OPNAME","total":10,"probleem":0,"tomap":0,"check":10,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-27"},{"name":"AVL_DOSSIER_SUBDOSS_CODE","module":"DOSSIER","total":6,"probleem":0,"tomap":0,"check":6,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-27"},{"name":"AVL_LOGISTK_PRSELGRP_GROEPCODE","module":"LOGISTK","total":3,"probleem":0,"tomap":0,"check":0,"approved":3,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_OPNAME_OPNSUBTYPE_OPNTYPE","module":"OPNAME","total":27,"probleem":1,"tomap":2,"check":24,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-27"},{"name":"AVL_ECONSULT_POSTBOX_ID","module":"ECONSULT","total":1,"probleem":0,"tomap":0,"check":1,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Zorgportaal","datum":"2026-03-27"},{"name":"AVL_LOGISTK_RETOMSCH_CODE","module":"LOGISTK","total":7,"probleem":0,"tomap":0,"check":0,"approved":7,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_OPNAME_OPNTYPE1_CODE","module":"OPNAME","total":17,"probleem":0,"tomap":17,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-27"},{"name":"AVL_LOGISTK_RETOURWZ_CODE","module":"LOGISTK","total":4,"probleem":0,"tomap":0,"check":0,"approved":4,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_OPNAME_PLANANNULERIN_CODE","module":"OPNAME","total":14,"probleem":2,"tomap":0,"check":12,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-27"},{"name":"AVL_OPNAME_PLANONTSLR_CODE","module":"OPNAME","total":25,"probleem":2,"tomap":8,"check":15,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-27"},{"name":"AVL_EPISODE_TRIALCAT_CODE","module":"EPISODE","total":1,"probleem":0,"tomap":1,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Episode / Validatie","datum":"2026-03-27"},{"name":"AVL_ORDERCOM_ORDCAT_CATEGORIE","module":"ORDERCOM","total":200,"probleem":0,"tomap":0,"check":200,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-27"},{"name":"AVL_VRLIJST_VRLCAT_CODE","module":"VRLIJST","total":639,"probleem":0,"tomap":3,"check":636,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-27"},{"name":"AVL_LOGISTK_VRDMUTOMSCH_CODE","module":"LOGISTK","total":3,"probleem":0,"tomap":0,"check":0,"approved":3,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_ORDERCOM_ORDSTAT_STATUSCODE","module":"ORDERCOM","total":524,"probleem":0,"tomap":520,"check":4,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-27"},{"name":"AVL_WEBAGEN_AGVRWCAT_ID","module":"WEBAGEN","total":72,"probleem":0,"tomap":10,"check":15,"approved":47,"heeftProbleem":false,"domain":1,"wg":"WG Zorgportaal","datum":"2026-03-27"},{"name":"AVL_FAKTUUR_BTW_BTWCODE","module":"FAKTUUR","total":7,"probleem":3,"tomap":0,"check":7,"approved":0,"heeftProbleem":true,"domain":8,"wg":"WG Factuur","datum":"2026-03-27"},{"name":"AVL_PATCODE_ISOLATIE_INDICATIE_CODE","module":"PATIENT","total":29,"probleem":0,"tomap":28,"check":1,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-27"},{"name":"AVL_WI_DOCCAT_ID","module":"WI","total":67,"probleem":0,"tomap":0,"check":67,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Verslag","datum":"2026-03-27"},{"name":"AVL_MULTIMED_DOCUTYPE_DOCTYPEID","module":"MULTIMED","total":162,"probleem":0,"tomap":99,"check":63,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-27"},{"name":"AVL_PATIENT_IDTYPES_IDTYPE","module":"PATIENT","total":6,"probleem":0,"tomap":2,"check":4,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-27"},{"name":"AVL_FAKTUUR_FINADMIN_ADMINCODE","module":"FAKTUUR","total":2,"probleem":0,"tomap":0,"check":2,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-27"},{"name":"AVL_PATIENT_OPTINTYP_CODE","module":"PATIENT","total":18,"probleem":1,"tomap":6,"check":12,"approved":0,"heeftProbleem":true,"domain":1,"wg":"WG Patiënt","datum":"2026-03-27"},{"name":"AVL_MULTIMED_MMSTATUS_CODE","module":"MULTIMED","total":6,"probleem":0,"tomap":0,"check":6,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-27"},{"name":"AVL_PATIENT_PATCODE_CODE","module":"PATIENT","total":29,"probleem":0,"tomap":26,"check":3,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-27"},{"name":"AVL_FAKTUUR_OPNTAR_OPNTARIEF","module":"FAKTUUR","total":17,"probleem":0,"tomap":9,"check":8,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-27"},{"name":"AVL_MULTIMED_MULCONF_CONFIGID","module":"MULTIMED","total":173,"probleem":0,"tomap":172,"check":1,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-27"},{"name":"AVL_PATIENT_PATRELT_Code","module":"PATIENT","total":20,"probleem":0,"tomap":0,"check":20,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-27"},{"name":"AVL_ZISCON_DOMAIN_ID","module":"ZISCON","total":5,"probleem":0,"tomap":2,"check":3,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_PATIENT_RELPROP_CODE","module":"PATIENT","total":5,"probleem":3,"tomap":0,"check":5,"approved":0,"heeftProbleem":true,"domain":1,"wg":"WG Patiënt","datum":"2026-03-27"},{"name":"AVL_AGENDA_AGENLOC_CODE","module":"AGENDA","total":313,"probleem":0,"tomap":277,"check":36,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-27"},{"name":"AVL_ZISCON_GROEPEN_CODE","module":"ZISCON","total":334,"probleem":0,"tomap":334,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_FAKTUUR_TARAFD_CODE","module":"FAKTUUR","total":69,"probleem":0,"tomap":16,"check":53,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-27"},{"name":"AVL_AGENDA_BEHANDELDISC_CODE","module":"AGENDA","total":8,"probleem":0,"tomap":0,"check":8,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-27"},{"name":"AVL_ZISCON_USER_NAAM","module":"ZISCON","total":11824,"probleem":0,"tomap":0,"check":75,"approved":11749,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_MULTIMED_SUBCATGO_SUBCATGRID","module":"MULTIMED","total":104,"probleem":0,"tomap":104,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-27"},{"name":"AVL_RONTGEN_ROKAMER_CODE","module":"RONTGEN","total":137,"probleem":0,"tomap":137,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-27"},{"name":"AVL_ZISCON_USERFUNK_CODE","module":"ZISCON","total":1599,"probleem":0,"tomap":1599,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_RONTGEN_RONTLABO_CODE","module":"RONTGEN","total":451,"probleem":0,"tomap":451,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-27"},{"name":"AVL_AGENDA_MUTATIEREDEN_Code","module":"AGENDA","total":21,"probleem":0,"tomap":21,"check":0,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-27"},{"name":"AVL_ZISCON_USERSRT_CODE","module":"ZISCON","total":8,"probleem":0,"tomap":8,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_OK_ANATECH_CODE","module":"OK","total":158,"probleem":0,"tomap":158,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-27"},{"name":"MOSAIQ_RT_THERAPROP_TherapyPropertyID","module":"RTH","total":15,"probleem":0,"tomap":13,"check":2,"approved":0,"heeftProbleem":false,"domain":6,"wg":"WG Radiotherapie (Functioneel)","datum":"2026-03-27"},{"name":"AVL_RONTGEN_RONTLOC_CODE","module":"RONTGEN","total":5,"probleem":0,"tomap":5,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-27"},{"name":"AVL_AGENDA_SUBAGEND_SUBAGENDA","module":"AGENDA","total":4043,"probleem":0,"tomap":4043,"check":0,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-27"},{"name":"AVL_RONTGEN_VERRCODE_CODE","module":"RONTGEN","total":3992,"probleem":0,"tomap":3989,"check":3,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-27"},{"name":"AVL_ALLERGIE_CAUSMETH_CODE","module":"ALLERGIE","total":2,"probleem":0,"tomap":2,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG EVS (incl. antistolling) + WG Clinical Rules","datum":"2026-03-27"},{"name":"AVL_OK_ANNUREDE_CODE","module":"OK","total":15,"probleem":0,"tomap":0,"check":15,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-27"},{"name":"AVL_ALLERGIE_ERNST_ID","module":"ALLERGIE","total":4,"probleem":0,"tomap":4,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG EVS (incl. antistolling) + WG Clinical Rules","datum":"2026-03-27"},{"name":"AVL_ROUTEER_RADRTYPE_ADRTYPEID","module":"ROUTEER","total":7,"probleem":0,"tomap":0,"check":7,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-27"},{"name":"AVL_AMBULANT_AMBVERS_BRON","module":"AMBULANT","total":36,"probleem":26,"tomap":0,"check":36,"approved":0,"heeftProbleem":true,"domain":8,"wg":"WG Factuur","datum":"2026-03-27"},{"name":"AVL_OK_ARTIKELGROEPEN_CODE","module":"OK","total":11,"probleem":8,"tomap":0,"check":11,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG OK","datum":"2026-03-27"},{"name":"AVL_OK_FUNKTIE_CODE","module":"OK","total":67,"probleem":3,"tomap":16,"check":51,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG OK","datum":"2026-03-27"},{"name":"AVL_RP_STATUSMUTREASON_ID","module":"OPNAME","total":18,"probleem":1,"tomap":0,"check":17,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-27"},{"name":"AVL_APOTHEEK_CONSBRON_CODE","module":"APOTHEEK","total":17,"probleem":0,"tomap":0,"check":0,"approved":17,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_OK_LIGGING_CODE","module":"OK","total":21,"probleem":0,"tomap":0,"check":21,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-27"},{"name":"AVL_APOTHEEK_CONSREDEN_CODE","module":"APOTHEEK","total":31,"probleem":0,"tomap":0,"check":0,"approved":31,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_OK_LOKATIE_CODE","module":"OK","total":4,"probleem":0,"tomap":0,"check":4,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-27"},{"name":"AVL_APOTHEEK_CONSTYPE_CODE","module":"APOTHEEK","total":9,"probleem":0,"tomap":0,"check":0,"approved":9,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_APOTHEEK_DELIMETH_Code","module":"APOTHEEK","total":12,"probleem":11,"tomap":0,"check":12,"approved":0,"heeftProbleem":true,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_OK_OKKAMERS_CODE","module":"OK","total":67,"probleem":0,"tomap":0,"check":67,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-27"},{"name":"AVL_CONTACT_TYPETEL_TYPETEL","module":"CONTACT","total":11,"probleem":0,"tomap":11,"check":0,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-27"},{"name":"AVL_CSZISLIB_ARTS_ARTSCODE","module":"CSZISLIB","total":170313,"probleem":1453,"tomap":0,"check":1,"approved":168859,"heeftProbleem":true,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_HAAS_XENTPRACT_DEF_ID","module":"HAAS","total":476,"probleem":187,"tomap":0,"check":187,"approved":289,"heeftProbleem":true,"domain":1,"wg":"WG Zorgplatform","datum":"2026-03-27"},{"name":"AVL_OK_POSTOPBESTEMMING_CODE","module":"OK","total":1,"probleem":0,"tomap":0,"check":1,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-27"},{"name":"AVL_CSZISLIB_ARTSTYPE_CODE","module":"CSZISLIB","total":17,"probleem":0,"tomap":0,"check":17,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_LAB_BRON_BRONCODE","module":"LAB","total":10,"probleem":0,"tomap":10,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Order KCL/MMB/PA","datum":"2026-03-27"},{"name":"AVL_OK_PRIORITE_CODE","module":"OK","total":4,"probleem":0,"tomap":2,"check":2,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-27"},{"name":"AVL_CSZISLIB_BURGSTAA_CODE","module":"CSZISLIB","total":5,"probleem":0,"tomap":0,"check":5,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_OK_PROFCODE_CODE","module":"OK","total":34,"probleem":7,"tomap":0,"check":34,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG OK","datum":"2026-03-27"},{"name":"AVL_OK_SESAFWRD_CODE","module":"OK","total":8,"probleem":0,"tomap":0,"check":8,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-27"},{"name":"AVL_CSZISLIB_LAND_CODE","module":"CSZISLIB","total":254,"probleem":0,"tomap":254,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_LOGISTK_ARTGROEP_ARTGRPCD","module":"LOGISTK","total":14,"probleem":0,"tomap":14,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_OK_VERTR_CODE","module":"OK","total":97,"probleem":0,"tomap":49,"check":48,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-27"},{"name":"AVL_CSZISLIB_LOCCODE_CODE","module":"CSZISLIB","total":10,"probleem":0,"tomap":0,"check":10,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_OPNAME_BEDDEN_BEDNR","module":"OPNAME","total":864,"probleem":0,"tomap":0,"check":864,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-27"},{"name":"AVL_CSZISLIB_SPEC_SPECCODE","module":"CSZISLIB","total":57,"probleem":0,"tomap":7,"check":50,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"},{"name":"AVL_LOGISTK_BESTELTYPE_CODE","module":"LOGISTK","total":6,"probleem":0,"tomap":0,"check":0,"approved":6,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-27"},{"name":"AVL_OPNAME_BESTEM_CODE","module":"OPNAME","total":28,"probleem":9,"tomap":0,"check":20,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-27"},{"name":"AVL_METINGEN_PARAMS_PARAMID","module":"METINGEN","total":220,"probleem":0,"tomap":145,"check":46,"approved":29,"heeftProbleem":false,"domain":4,"wg":"WG PDMS (Techniek)","datum":"2026-03-27"},{"name":"AVL_FAKTUUR_CONTROLEINV_ID","module":"FAKTUUR","total":4,"probleem":0,"tomap":4,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-27"},{"name":"AVL_ORDERLAB_TESTCODE_TESTCODE","module":"ORDERLAB","total":6376,"probleem":0,"tomap":6376,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Order KCL/MMB/PA","datum":"2026-03-27"},{"name":"AVL_OPNAME_ANNREDEN_CODE","module":"OPNAME","total":18,"probleem":0,"tomap":0,"check":18,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-27"},{"name":"AVL_CONSULT_CATEGORY_CODE","module":"CONSULT","total":84,"probleem":0,"tomap":84,"check":0,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Klein","datum":"2026-03-27"},{"name":"AVL_WI_ADRALIAS_ID","module":"WI","total":9,"probleem":0,"tomap":0,"check":9,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-27"}]},{"datum":"2026-03-30","bestand":"mapping-20260330.txt","rijen":[{"name":"AVL_CSZISLIB_TAAL_CODE","module":"CSZISLIB","total":8,"probleem":0,"tomap":0,"check":8,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_CSZISLIB_TBI_TBICODE","module":"CSZISLIB","total":52840,"probleem":58,"tomap":303,"check":4008,"approved":48471,"heeftProbleem":true,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_LOGISTK_CREDIT_CREDITNR","module":"LOGISTK","total":160,"probleem":0,"tomap":0,"check":0,"approved":160,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_CSZISLIB_TITEL_CODE","module":"CSZISLIB","total":7,"probleem":0,"tomap":0,"check":7,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_LOGISTK_GEVAARCAT_CATID","module":"LOGISTK","total":72,"probleem":0,"tomap":0,"check":0,"approved":72,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_OPNAME_HERKOMST_CODE","module":"OPNAME","total":14,"probleem":4,"tomap":0,"check":14,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-30"},{"name":"AVL_DOSSIER_CMPERNST_NEWCODE","module":"DOSSIER","total":27,"probleem":0,"tomap":6,"check":0,"approved":21,"heeftProbleem":false,"domain":8,"wg":"WG DCR/LBZ","datum":"2026-03-30"},{"name":"AVL_LOGISTK_GEVAARIND_INDELID","module":"LOGISTK","total":21,"probleem":0,"tomap":0,"check":0,"approved":21,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_DOSSIER_DCRLNKREG_ID","module":"DOSSIER","total":94,"probleem":0,"tomap":17,"check":77,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG DCR/LBZ","datum":"2026-03-30"},{"name":"AVL_LOGISTK_GEVARENPICT_CODE","module":"LOGISTK","total":10,"probleem":0,"tomap":0,"check":0,"approved":10,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_DOSSIER_DIAGRELS_CODE","module":"DOSSIER","total":54,"probleem":0,"tomap":18,"check":36,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-30"},{"name":"AVL_LOGISTK_INSTITUUT_CODE","module":"LOGISTK","total":3,"probleem":0,"tomap":0,"check":0,"approved":3,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_LOGISTK_LEVERWYZ_CODE","module":"LOGISTK","total":5,"probleem":0,"tomap":0,"check":0,"approved":5,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_STERIEL_NEWSTATUS_CODE","module":"STERIEL","total":6,"probleem":0,"tomap":0,"check":0,"approved":6,"heeftProbleem":false,"domain":3,"wg":"WG Steriel - CSA","datum":"2026-03-30"},{"name":"AVL_OPNAME_OPNCODE_CODE","module":"OPNAME","total":10,"probleem":0,"tomap":0,"check":10,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-30"},{"name":"AVL_DOSSIER_SUBDOSS_CODE","module":"DOSSIER","total":6,"probleem":0,"tomap":0,"check":6,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-30"},{"name":"AVL_LOGISTK_PRSELGRP_GROEPCODE","module":"LOGISTK","total":3,"probleem":0,"tomap":0,"check":0,"approved":3,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_OPNAME_OPNSUBTYPE_OPNTYPE","module":"OPNAME","total":27,"probleem":1,"tomap":2,"check":24,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-30"},{"name":"AVL_ECONSULT_POSTBOX_ID","module":"ECONSULT","total":1,"probleem":0,"tomap":0,"check":1,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Zorgportaal","datum":"2026-03-30"},{"name":"AVL_LOGISTK_RETOMSCH_CODE","module":"LOGISTK","total":7,"probleem":0,"tomap":0,"check":0,"approved":7,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_OPNAME_OPNTYPE1_CODE","module":"OPNAME","total":17,"probleem":0,"tomap":17,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-30"},{"name":"AVL_LOGISTK_RETOURWZ_CODE","module":"LOGISTK","total":4,"probleem":0,"tomap":0,"check":0,"approved":4,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_OPNAME_PLANANNULERIN_CODE","module":"OPNAME","total":14,"probleem":2,"tomap":0,"check":12,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-30"},{"name":"AVL_OPNAME_PLANONTSLR_CODE","module":"OPNAME","total":25,"probleem":2,"tomap":8,"check":15,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-30"},{"name":"AVL_EPISODE_TRIALCAT_CODE","module":"EPISODE","total":1,"probleem":0,"tomap":1,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Episode / Validatie","datum":"2026-03-30"},{"name":"AVL_ORDERCOM_ORDCAT_CATEGORIE","module":"ORDERCOM","total":200,"probleem":0,"tomap":0,"check":200,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-30"},{"name":"AVL_VRLIJST_VRLCAT_CODE","module":"VRLIJST","total":639,"probleem":0,"tomap":3,"check":636,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-30"},{"name":"AVL_LOGISTK_VRDMUTOMSCH_CODE","module":"LOGISTK","total":3,"probleem":0,"tomap":0,"check":0,"approved":3,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_ORDERCOM_ORDSTAT_STATUSCODE","module":"ORDERCOM","total":524,"probleem":0,"tomap":520,"check":4,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Groot","datum":"2026-03-30"},{"name":"AVL_WEBAGEN_AGVRWCAT_ID","module":"WEBAGEN","total":72,"probleem":0,"tomap":10,"check":15,"approved":47,"heeftProbleem":false,"domain":1,"wg":"WG Zorgportaal","datum":"2026-03-30"},{"name":"AVL_FAKTUUR_BTW_BTWCODE","module":"FAKTUUR","total":7,"probleem":3,"tomap":0,"check":7,"approved":0,"heeftProbleem":true,"domain":8,"wg":"WG Factuur","datum":"2026-03-30"},{"name":"AVL_PATCODE_ISOLATIE_INDICATIE_CODE","module":"PATIENT","total":29,"probleem":0,"tomap":28,"check":1,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-30"},{"name":"AVL_WI_DOCCAT_ID","module":"WI","total":67,"probleem":0,"tomap":0,"check":67,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Verslag","datum":"2026-03-30"},{"name":"AVL_MULTIMED_DOCUTYPE_DOCTYPEID","module":"MULTIMED","total":162,"probleem":0,"tomap":99,"check":63,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-30"},{"name":"AVL_PATIENT_IDTYPES_IDTYPE","module":"PATIENT","total":6,"probleem":0,"tomap":2,"check":4,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-30"},{"name":"AVL_FAKTUUR_FINADMIN_ADMINCODE","module":"FAKTUUR","total":2,"probleem":0,"tomap":0,"check":2,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-30"},{"name":"AVL_PATIENT_OPTINTYP_CODE","module":"PATIENT","total":18,"probleem":1,"tomap":6,"check":12,"approved":0,"heeftProbleem":true,"domain":1,"wg":"WG Patiënt","datum":"2026-03-30"},{"name":"AVL_MULTIMED_MMSTATUS_CODE","module":"MULTIMED","total":6,"probleem":0,"tomap":0,"check":6,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-30"},{"name":"AVL_PATIENT_PATCODE_CODE","module":"PATIENT","total":29,"probleem":0,"tomap":26,"check":3,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-30"},{"name":"AVL_FAKTUUR_OPNTAR_OPNTARIEF","module":"FAKTUUR","total":17,"probleem":0,"tomap":9,"check":8,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-30"},{"name":"AVL_MULTIMED_MULCONF_CONFIGID","module":"MULTIMED","total":173,"probleem":0,"tomap":172,"check":1,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-30"},{"name":"AVL_PATIENT_PATRELT_Code","module":"PATIENT","total":20,"probleem":0,"tomap":0,"check":20,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-30"},{"name":"AVL_ZISCON_DOMAIN_ID","module":"ZISCON","total":5,"probleem":0,"tomap":2,"check":3,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_PATIENT_RELPROP_CODE","module":"PATIENT","total":5,"probleem":3,"tomap":0,"check":5,"approved":0,"heeftProbleem":true,"domain":1,"wg":"WG Patiënt","datum":"2026-03-30"},{"name":"AVL_AGENDA_AGENLOC_CODE","module":"AGENDA","total":313,"probleem":0,"tomap":277,"check":36,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-30"},{"name":"AVL_ZISCON_GROEPEN_CODE","module":"ZISCON","total":334,"probleem":0,"tomap":334,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_FAKTUUR_TARAFD_CODE","module":"FAKTUUR","total":69,"probleem":0,"tomap":16,"check":53,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-30"},{"name":"AVL_AGENDA_BEHANDELDISC_CODE","module":"AGENDA","total":8,"probleem":0,"tomap":0,"check":8,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-30"},{"name":"AVL_ZISCON_USER_NAAM","module":"ZISCON","total":11824,"probleem":0,"tomap":0,"check":75,"approved":11749,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_MULTIMED_SUBCATGO_SUBCATGRID","module":"MULTIMED","total":104,"probleem":0,"tomap":104,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Multimedia","datum":"2026-03-30"},{"name":"AVL_RONTGEN_ROKAMER_CODE","module":"RONTGEN","total":137,"probleem":0,"tomap":137,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-30"},{"name":"AVL_ZISCON_USERFUNK_CODE","module":"ZISCON","total":1599,"probleem":0,"tomap":1599,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_RONTGEN_RONTLABO_CODE","module":"RONTGEN","total":451,"probleem":0,"tomap":451,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-30"},{"name":"AVL_AGENDA_MUTATIEREDEN_Code","module":"AGENDA","total":21,"probleem":0,"tomap":21,"check":0,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-30"},{"name":"AVL_ZISCON_USERSRT_CODE","module":"ZISCON","total":8,"probleem":0,"tomap":8,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_OK_ANATECH_CODE","module":"OK","total":158,"probleem":0,"tomap":158,"check":0,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-30"},{"name":"MOSAIQ_RT_THERAPROP_TherapyPropertyID","module":"RTH","total":15,"probleem":0,"tomap":13,"check":2,"approved":0,"heeftProbleem":false,"domain":6,"wg":"WG Radiotherapie (Functioneel)","datum":"2026-03-30"},{"name":"AVL_RONTGEN_RONTLOC_CODE","module":"RONTGEN","total":5,"probleem":0,"tomap":5,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-30"},{"name":"AVL_AGENDA_SUBAGEND_SUBAGENDA","module":"AGENDA","total":4043,"probleem":0,"tomap":4043,"check":0,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Poliklinisch proces","datum":"2026-03-30"},{"name":"AVL_RONTGEN_VERRCODE_CODE","module":"RONTGEN","total":3992,"probleem":0,"tomap":3989,"check":3,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Radiologie & NG","datum":"2026-03-30"},{"name":"AVL_ALLERGIE_CAUSMETH_CODE","module":"ALLERGIE","total":2,"probleem":0,"tomap":2,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG EVS (incl. antistolling) + WG Clinical Rules","datum":"2026-03-30"},{"name":"AVL_OK_ANNUREDE_CODE","module":"OK","total":15,"probleem":0,"tomap":0,"check":15,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-30"},{"name":"AVL_ALLERGIE_ERNST_ID","module":"ALLERGIE","total":4,"probleem":0,"tomap":4,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG EVS (incl. antistolling) + WG Clinical Rules","datum":"2026-03-30"},{"name":"AVL_ROUTEER_RADRTYPE_ADRTYPEID","module":"ROUTEER","total":7,"probleem":0,"tomap":0,"check":7,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-30"},{"name":"AVL_AMBULANT_AMBVERS_BRON","module":"AMBULANT","total":36,"probleem":26,"tomap":0,"check":36,"approved":0,"heeftProbleem":true,"domain":8,"wg":"WG Factuur","datum":"2026-03-30"},{"name":"AVL_OK_ARTIKELGROEPEN_CODE","module":"OK","total":11,"probleem":8,"tomap":0,"check":11,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG OK","datum":"2026-03-30"},{"name":"AVL_OK_FUNKTIE_CODE","module":"OK","total":67,"probleem":3,"tomap":16,"check":51,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG OK","datum":"2026-03-30"},{"name":"AVL_RP_STATUSMUTREASON_ID","module":"OPNAME","total":18,"probleem":1,"tomap":0,"check":17,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-30"},{"name":"AVL_APOTHEEK_CONSBRON_CODE","module":"APOTHEEK","total":17,"probleem":0,"tomap":0,"check":0,"approved":17,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_OK_LIGGING_CODE","module":"OK","total":21,"probleem":0,"tomap":0,"check":21,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-30"},{"name":"AVL_APOTHEEK_CONSREDEN_CODE","module":"APOTHEEK","total":31,"probleem":0,"tomap":0,"check":0,"approved":31,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_OK_LOKATIE_CODE","module":"OK","total":4,"probleem":0,"tomap":0,"check":4,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-30"},{"name":"AVL_APOTHEEK_CONSTYPE_CODE","module":"APOTHEEK","total":9,"probleem":0,"tomap":0,"check":0,"approved":9,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_APOTHEEK_DELIMETH_Code","module":"APOTHEEK","total":12,"probleem":11,"tomap":0,"check":12,"approved":0,"heeftProbleem":true,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_OK_OKKAMERS_CODE","module":"OK","total":67,"probleem":0,"tomap":0,"check":67,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-30"},{"name":"AVL_CONTACT_TYPETEL_TYPETEL","module":"CONTACT","total":11,"probleem":0,"tomap":11,"check":0,"approved":0,"heeftProbleem":false,"domain":1,"wg":"WG Patiënt","datum":"2026-03-30"},{"name":"AVL_CSZISLIB_ARTS_ARTSCODE","module":"CSZISLIB","total":170313,"probleem":1453,"tomap":0,"check":1,"approved":168859,"heeftProbleem":true,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_HAAS_XENTPRACT_DEF_ID","module":"HAAS","total":476,"probleem":187,"tomap":0,"check":187,"approved":289,"heeftProbleem":true,"domain":1,"wg":"WG Zorgplatform","datum":"2026-03-30"},{"name":"AVL_OK_POSTOPBESTEMMING_CODE","module":"OK","total":1,"probleem":0,"tomap":0,"check":1,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-30"},{"name":"AVL_CSZISLIB_ARTSTYPE_CODE","module":"CSZISLIB","total":17,"probleem":0,"tomap":0,"check":17,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_LAB_BRON_BRONCODE","module":"LAB","total":10,"probleem":0,"tomap":10,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Order KCL/MMB/PA","datum":"2026-03-30"},{"name":"AVL_OK_PRIORITE_CODE","module":"OK","total":4,"probleem":0,"tomap":2,"check":2,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-30"},{"name":"AVL_CSZISLIB_BURGSTAA_CODE","module":"CSZISLIB","total":5,"probleem":0,"tomap":0,"check":5,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_OK_PROFCODE_CODE","module":"OK","total":34,"probleem":7,"tomap":0,"check":34,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG OK","datum":"2026-03-30"},{"name":"AVL_OK_SESAFWRD_CODE","module":"OK","total":8,"probleem":0,"tomap":0,"check":8,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-30"},{"name":"AVL_CSZISLIB_LAND_CODE","module":"CSZISLIB","total":254,"probleem":0,"tomap":254,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_LOGISTK_ARTGROEP_ARTGRPCD","module":"LOGISTK","total":14,"probleem":0,"tomap":14,"check":0,"approved":0,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_OK_VERTR_CODE","module":"OK","total":97,"probleem":0,"tomap":49,"check":48,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG OK","datum":"2026-03-30"},{"name":"AVL_CSZISLIB_LOCCODE_CODE","module":"CSZISLIB","total":10,"probleem":0,"tomap":0,"check":10,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_OPNAME_BEDDEN_BEDNR","module":"OPNAME","total":864,"probleem":0,"tomap":0,"check":864,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-30"},{"name":"AVL_CSZISLIB_SPEC_SPECCODE","module":"CSZISLIB","total":57,"probleem":0,"tomap":7,"check":50,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"},{"name":"AVL_LOGISTK_BESTELTYPE_CODE","module":"LOGISTK","total":6,"probleem":0,"tomap":0,"check":0,"approved":6,"heeftProbleem":false,"domain":7,"wg":"WG Logistiek (Apotheek)","datum":"2026-03-30"},{"name":"AVL_OPNAME_BESTEM_CODE","module":"OPNAME","total":28,"probleem":9,"tomap":0,"check":20,"approved":0,"heeftProbleem":true,"domain":3,"wg":"WG Opname","datum":"2026-03-30"},{"name":"AVL_METINGEN_PARAMS_PARAMID","module":"METINGEN","total":220,"probleem":0,"tomap":145,"check":46,"approved":29,"heeftProbleem":false,"domain":4,"wg":"WG PDMS (Techniek)","datum":"2026-03-30"},{"name":"AVL_FAKTUUR_CONTROLEINV_ID","module":"FAKTUUR","total":4,"probleem":0,"tomap":4,"check":0,"approved":0,"heeftProbleem":false,"domain":8,"wg":"WG Factuur","datum":"2026-03-30"},{"name":"AVL_ORDERLAB_TESTCODE_TESTCODE","module":"ORDERLAB","total":6376,"probleem":0,"tomap":6376,"check":0,"approved":0,"heeftProbleem":false,"domain":5,"wg":"WG Order KCL/MMB/PA","datum":"2026-03-30"},{"name":"AVL_OPNAME_ANNREDEN_CODE","module":"OPNAME","total":18,"probleem":0,"tomap":0,"check":18,"approved":0,"heeftProbleem":false,"domain":3,"wg":"WG Opname","datum":"2026-03-30"},{"name":"AVL_CONSULT_CATEGORY_CODE","module":"CONSULT","total":84,"probleem":0,"tomap":84,"check":0,"approved":0,"heeftProbleem":false,"domain":2,"wg":"WG EPD Beschouwend Klein","datum":"2026-03-30"},{"name":"AVL_WI_ADRALIAS_ID","module":"WI","total":9,"probleem":0,"tomap":0,"check":9,"approved":0,"heeftProbleem":false,"domain":8,"wg":"AG Stamtabellen (zkh)","datum":"2026-03-30"}]}]</script>
+</body>
+</html>

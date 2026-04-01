@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Let's fHiX it! — Rapportage Portal</title>
+<style>
+:root {
+  --g:#007062; --gd:#005549; --gm:#008f7a; --gl:#00947c;
+  --lime:#E3FFAA; --lm2:#c8f07a; --lmd:#a8d850;
+  --bl:#1a6fa8; --rd:#c0392b; --am:#d4870a;
+  --bgl:#f2f5f3; --bgm:#e6ecea; --bd:#cdd8d4; --grd:#5a7068;
+  --sh: 0 2px 14px rgba(0,112,98,.10), 0 1px 3px rgba(0,0,0,.06);
+  --shh: 0 6px 28px rgba(0,112,98,.18);
+  --r: 8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:Arial,Helvetica,sans-serif;background:var(--bgl);color:#111;}
+
+/* ── HEADER ── */
+.hdr {
+  background: var(--gd);
+  position: sticky; top:0; z-index:100;
+  box-shadow: 0 2px 16px rgba(0,50,40,.35);
+}
+.hdr-i {
+  max-width:1600px; margin:0 auto; padding:0 28px;
+  display:flex; align-items:stretch; height:58px;
+}
+.hdr-logo {
+  background:var(--lime); color:var(--gd); font-weight:700; font-size:15px;
+  padding:0 28px 0 18px; display:flex; align-items:center; margin-right:18px; flex-shrink:0;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%);
+}
+.hdr-txt { display:flex; flex-direction:column; justify-content:center; flex:1; min-width:0; }
+.hdr-t1 { font-size:15px; font-weight:700; color:#fff; }
+.hdr-t2 { font-size:11px; color:rgba(255,255,255,.6); margin-top:1px; }
+.hdr-r { margin-left:auto; display:flex; align-items:center; gap:10px; padding-left:20px; flex-shrink:0; }
+.hdr-badge {
+  background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.22);
+  color:rgba(255,255,255,.88); font-size:11.5px; padding:5px 14px; border-radius:20px; white-space:nowrap;
+}
+.hdr-dot { width:8px; height:8px; border-radius:50%; background:#4cd964; flex-shrink:0; box-shadow:0 0 6px rgba(76,217,100,.6); }
+
+/* ── LAYOUT ── */
+.layout {
+  display:flex; flex-direction:column;
+  height: calc(100vh - 58px);
+}
+
+/* ── TOP PANEL (cards) ── */
+.top-panel {
+  background: var(--gd);
+  padding: 18px 28px 16px;
+  flex-shrink: 0;
+}
+.top-inner { max-width:1600px; margin:0 auto; }
+
+.cards-row { display:flex; gap:14px; align-items:stretch; }
+.card {
+  background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.18);
+  border-radius:var(--r); padding:14px 18px; cursor:pointer;
+  transition:all .2s; flex:1; min-width:0; position:relative;
+  display:flex; align-items:center; gap:14px;
+}
+.card:hover { background:rgba(255,255,255,.17); border-color:rgba(255,255,255,.35); transform:translateY(-1px); }
+.card.active { background:rgba(227,255,170,.18); border-color:var(--lime); }
+.card-icon { font-size:26px; flex-shrink:0; opacity:.9; }
+.card-body { flex:1; min-width:0; }
+.card-title { font-size:13px; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.card-meta { font-size:11px; color:rgba(255,255,255,.6); margin-top:2px; }
+.card-actions { display:flex; gap:6px; flex-shrink:0; }
+.btn-sm {
+  padding:5px 11px; border-radius:5px; font-size:11px; font-weight:700;
+  cursor:pointer; border:none; font-family:inherit; text-decoration:none;
+  display:inline-flex; align-items:center; gap:4px; white-space:nowrap;
+  transition: all .15s;
+}
+.btn-sm.open-tab {
+  background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.25);
+}
+.btn-sm.open-tab:hover { background:rgba(255,255,255,.28); }
+.btn-sm.view-frame {
+  background:var(--lime); color:var(--gd);
+}
+.btn-sm.view-frame:hover { background:var(--lm2); }
+
+/* Active indicator */
+.card-active-dot {
+  width:6px; height:6px; border-radius:50%; background:var(--lime);
+  position:absolute; top:10px; right:10px; display:none;
+}
+.card.active .card-active-dot { display:block; }
+
+/* ── IFRAME AREA ── */
+.frame-area {
+  flex:1; min-height:0;
+  display:flex; flex-direction:column;
+}
+.frame-bar {
+  background:#fff; border-bottom:1px solid var(--bd);
+  padding:0 28px; height:40px;
+  display:flex; align-items:center; gap:14px;
+  flex-shrink:0; box-shadow:0 1px 4px rgba(0,0,0,.05);
+}
+.frame-bar-title {
+  font-size:13px; font-weight:700; color:var(--gd);
+  flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.frame-bar-url {
+  font-size:11px; color:var(--grd); font-family:monospace;
+  background:var(--bgl); border:1px solid var(--bd); border-radius:4px;
+  padding:3px 10px; max-width:320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.btn-reload {
+  background:none; border:1px solid var(--bd); border-radius:4px;
+  padding:4px 10px; font-size:11px; color:var(--grd); cursor:pointer;
+  font-family:inherit; transition:all .15s; display:flex; align-items:center; gap:4px;
+}
+.btn-reload:hover { border-color:var(--g); color:var(--g); }
+.btn-fullscreen {
+  background:var(--g); color:#fff; border:none; border-radius:4px;
+  padding:5px 12px; font-size:11px; font-weight:700; cursor:pointer; font-family:inherit;
+  display:flex; align-items:center; gap:5px; text-decoration:none; transition:all .15s;
+}
+.btn-fullscreen:hover { background:var(--gd); }
+
+iframe {
+  flex:1; border:none; background:#fff;
+  display:block; width:100%;
+}
+
+/* ── WELCOME SCREEN ── */
+.welcome {
+  flex:1; display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:16px; background:var(--bgl);
+  padding:40px;
+}
+.welcome-icon { font-size:56px; opacity:.35; }
+.welcome-title { font-size:20px; font-weight:700; color:var(--gd); }
+.welcome-sub { font-size:13px; color:var(--grd); text-align:center; max-width:380px; line-height:1.65; }
+.welcome-hint {
+  background:#fff; border:1px solid var(--bd); border-radius:var(--r);
+  padding:12px 20px; font-size:12px; color:var(--grd); display:flex; align-items:center; gap:8px;
+  box-shadow:var(--sh);
+}
+
+/* ── STATUS BAR ── */
+.status-bar {
+  background:var(--gd); color:rgba(255,255,255,.6);
+  padding:4px 28px; font-size:10.5px;
+  display:flex; align-items:center; gap:20px;
+  flex-shrink:0;
+  border-top:1px solid rgba(255,255,255,.1);
+}
+.status-bar span { display:flex; align-items:center; gap:5px; }
+.status-bar strong { color:rgba(255,255,255,.85); }
+
+/* ── RESPONSIVENESS ── */
+@media(max-width:780px){
+  .cards-row { flex-direction:column; }
+  .hdr-r .hdr-badge { display:none; }
+  .frame-bar-url { display:none; }
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-i">
+    <div class="hdr-logo">NKI-AVL</div>
+    <div class="hdr-txt">
+      <div class="hdr-t1">Let's fHiX it! &mdash; Rapportage Portal</div>
+      <div class="hdr-t2">Maatwerk &rarr; HiX Standaard Content &nbsp;&middot;&nbsp; Dashboard overzicht</div>
+    </div>
+    <div class="hdr-r">
+      <div class="hdr-dot" title="Portaal actief"></div>
+      <span class="hdr-badge" id="hdr-date">Laden...</span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ── TOP PANEL ── -->
+  <div class="top-panel">
+    <div class="top-inner">
+      <div class="cards-row">
+
+        <!-- Card 1: Mapping Voortgang -->
+        <div class="card" id="card-0" onclick="laadFrame(0)">
+          <div class="card-active-dot"></div>
+          <div class="card-icon">📊</div>
+          <div class="card-body">
+            <div class="card-title">Mapping Voortgang</div>
+            <div class="card-meta">Gegenereerd: 30-03-2026 &nbsp;·&nbsp; Domeinen &amp; werkgroepen</div>
+          </div>
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a class="btn-sm open-tab" href="dashboard.html" target="_blank" title="Openen in nieuw tabblad">
+              ↗ Nieuw tabblad
+            </a>
+            <button class="btn-sm view-frame" onclick="laadFrame(0)">▶ Toon hier</button>
+          </div>
+        </div>
+
+        <!-- Card 2: Actiepunten Dashboard W14 -->
+        <div class="card" id="card-1" onclick="laadFrame(1)">
+          <div class="card-active-dot"></div>
+          <div class="card-icon">✅</div>
+          <div class="card-body">
+            <div class="card-title">Actiepunten Dashboard W14</div>
+            <div class="card-meta">Peildatum: 31-03-2026 &nbsp;·&nbsp; Gezamenlijk met ChipSoft &amp; Intern AVL</div>
+          </div>
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a class="btn-sm open-tab" href="AVL_HiX_Dashboard.html" target="_blank" title="Openen in nieuw tabblad">
+              ↗ Nieuw tabblad
+            </a>
+            <button class="btn-sm view-frame" onclick="laadFrame(1)">▶ Toon hier</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FRAME AREA ── -->
+  <div class="frame-area" id="frame-area">
+
+    <!-- Welcome state -->
+    <div class="welcome" id="welcome">
+      <div class="welcome-icon">📋</div>
+      <div class="welcome-title">Kies een rapportage</div>
+      <div class="welcome-sub">Klik op een van de kaarten hierboven om het dashboard te bekijken, of open het in een nieuw tabblad.</div>
+      <div class="welcome-hint">
+        💡 <span>Gebruik <strong>↗ Nieuw tabblad</strong> voor de beste ervaring op een groot scherm of tweede monitor.</span>
+      </div>
+    </div>
+
+    <!-- Frame bar (hidden until a dashboard is loaded) -->
+    <div class="frame-bar" id="frame-bar" style="display:none">
+      <span class="frame-bar-title" id="frame-title">—</span>
+      <span class="frame-bar-url" id="frame-url">—</span>
+      <button class="btn-reload" onclick="reloadFrame()" title="Herladen">&#8634; Herladen</button>
+      <a class="btn-fullscreen" id="frame-fulllink" href="#" target="_blank">↗ Volledig scherm</a>
+    </div>
+
+    <!-- The iframe -->
+    <iframe id="dash-frame" style="display:none" title="Dashboard"></iframe>
+
+  </div>
+
+  <!-- ── STATUS BAR ── -->
+  <div class="status-bar">
+    <span>📁 Beschikbare rapporten: <strong>2</strong></span>
+    <span>🏥 Project: <strong>NKI-AVL HiX Standaard Content</strong></span>
+    <span id="status-active">Geen dashboard actief</span>
+    <span style="margin-left:auto" id="status-time"></span>
+  </div>
+
+</div>
+
+<script>
+const DASHBOARDS = [
+  {
+    file: 'dashboard.html',
+    title: 'Mapping Voortgang',
+    datum: '30-03-2026'
+  },
+  {
+    file: 'AVL_HiX_Dashboard.html',
+    title: 'Actiepunten Dashboard',
+    datum: '31-03-2026'
+  }
+];
+
+let activeIdx = -1;
+
+function hideFrameHeader(frame) {
+  try {
+    const doc = frame.contentDocument || frame.contentWindow.document;
+    if (doc && doc.head) {
+      const existing = doc.getElementById('__portal-hide-hdr__');
+      if (existing) existing.remove();
+      const style = doc.createElement('style');
+      style.id = '__portal-hide-hdr__';
+      style.textContent = '.hdr { display: none !important; }';
+      doc.head.appendChild(style);
+    }
+  } catch(e) {}
+}
+
+function laadFrame(idx) {
+  const d = DASHBOARDS[idx];
+  activeIdx = idx;
+
+  document.querySelectorAll('.card').forEach((c, i) => {
+    c.classList.toggle('active', i === idx);
+  });
+
+  document.getElementById('welcome').style.display = 'none';
+  document.getElementById('frame-bar').style.display = 'flex';
+  const frame = document.getElementById('dash-frame');
+  frame.style.display = 'block';
+
+  frame.onload = function() { hideFrameHeader(this); };
+  frame.src = d.file;
+
+  document.getElementById('frame-title').textContent = d.title + '  ·  ' + d.datum;
+  document.getElementById('frame-url').textContent = d.file;
+  document.getElementById('frame-fulllink').href = d.file;
+  document.getElementById('status-active').innerHTML = 'Actief: <strong>' + d.title + '</strong>';
+}
+
+function reloadFrame() {
+  const frame = document.getElementById('dash-frame');
+  if (!frame.src) return;
+  frame.onload = function() { hideFrameHeader(this); };
+  const s = frame.src; frame.src = ''; frame.src = s;
+}
+
+// Header date
+function updateDate() {
+  const now = new Date();
+  const opts = { weekday:'short', day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' };
+  document.getElementById('hdr-date').textContent = now.toLocaleDateString('nl-NL', opts).replace(',', ' ·');
+  document.getElementById('status-time').textContent = now.toLocaleTimeString('nl-NL', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+updateDate();
+setInterval(updateDate, 1000);
+
+// Auto-load first dashboard on load
+window.addEventListener('DOMContentLoaded', () => {
+  // slight delay so page paints first
+  setTimeout(() => laadFrame(1), 300);
+});
+</script>
+</body>
+</html>
